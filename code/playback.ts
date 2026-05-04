@@ -2,9 +2,19 @@
 // CLI but invokable from library users:
 //
 //   import { parse, play } from '@cluesurf/beat'
-//   const { song } = parse(readFileSync('foo.beat', 'utf8'))
-//   await play(song)                    // play once
-//   await play(song, { loop: true })    // forever; resolves on stop()
+//   const beat = parse(readFileSync('foo.beat', 'utf8'))
+//   const stop = play(beat.song, { loop: true })
+//   // ...
+//   await stop()
+//
+// `play()` returns a single function. Call it (and await) to
+// terminate cleanly: cancels pending hits, sends all-notes-off,
+// closes the MIDI port, then resolves once the playback promise
+// has finished.
+//
+// For one-shot playback (no loop), don't call stop — let the
+// process exit naturally, OR await stop() which will resolve
+// when the single pass finishes (it's a no-op if already done).
 
 import easymidi from 'easymidi'
 
@@ -27,14 +37,12 @@ export type PlayOptions = {
   onLoopComplete?: (iteration: number) => void
 }
 
-export type PlayHandle = {
-  // Promise that resolves when playback finishes (or stop() is called).
-  promise: Promise<void>
-  // Cancel pending hits, send all-notes-off, close the MIDI port.
-  stop: () => void
-}
+// Awaitable stop. Calling it sets the cancellation flag and
+// returns a promise that resolves when the playback loop has
+// fully drained + the MIDI port is closed.
+export type Stop = () => Promise<void>
 
-export function play(song: Song, opts: PlayOptions = {}): PlayHandle {
+export function play(song: Song, opts: PlayOptions = {}): Stop {
   const output = openDrumOutput()
   let timers: NodeJS.Timeout[] = []
   const sounding = new Set<number>()
@@ -46,9 +54,7 @@ export function play(song: Song, opts: PlayOptions = {}): PlayHandle {
     setTimeout(() => sounding.delete(hit.note), (hit.durationMs ?? 120) + 50)
   }
 
-  function stop(): void {
-    if (stopped) return
-    stopped = true
+  function teardown(): void {
     for (const t of timers) clearTimeout(t)
     timers = []
     for (let ch = 0; ch < 16; ch++) {
@@ -90,7 +96,7 @@ export function play(song: Song, opts: PlayOptions = {}): PlayHandle {
     })
   }
 
-  const promise = (async (): Promise<void> => {
+  const finished = (async (): Promise<void> => {
     let iteration = 0
     while (!stopped) {
       await schedulePass()
@@ -98,10 +104,15 @@ export function play(song: Song, opts: PlayOptions = {}): PlayHandle {
       opts.onLoopComplete?.(iteration)
       if (!opts.loop) break
     }
-    stop()
+    teardown()
   })()
 
-  return { promise, stop }
+  return async () => {
+    stopped = true
+    for (const t of timers) clearTimeout(t)
+    timers = []
+    await finished
+  }
 }
 
 function resolveHumanize(

@@ -1,22 +1,44 @@
-// Hello-world MIDI: send four hits (kick / snare / kick /
-// snare) over half a second each. If you have Logic Pro
-// open with Superior Drummer 3 on a record-enabled track
-// listening to the IAC bus, you'll hear it.
+// Public surface of @cluesurf/beat for library users.
 //
-// Run: pnpm boot
+//   import { parse, play } from '@cluesurf/beat'
+//
+//   const beat = parse(readFileSync('./calm.beat', 'utf8'))
+//   const stop = play(beat.song, { loop: true })
+//   await stop()
 
-import { openDrumOutput } from './output'
-import { sendHit } from './hit'
-import { NOTE } from './note'
+export { parse } from './tab/parser'
+export { load } from './tab/load'
+export { play, type PlayOptions, type Stop } from './playback'
 
-const output = openDrumOutput()
+// Humanization
+export { humanize, HUMANIZE, type HumanizeConfig, type HumanizePreset } from './humanize'
 
-setTimeout(() => sendHit(output, { note: NOTE.kick }), 500)
-setTimeout(() => sendHit(output, { note: NOTE.snare }), 1000)
-setTimeout(() => sendHit(output, { note: NOTE.kick }), 1500)
-setTimeout(() => sendHit(output, { note: NOTE.snare }), 2000)
+// Song / Hit / Pattern types and helpers
+export {
+  expandSong,
+  type Hit,
+  type Pattern,
+  type Section,
+  type Song,
+} from './song'
+export { expandArrangement, type BarInfo } from './arrangement'
 
-setTimeout(() => {
-  output.close()
-  console.log('[beat] done')
-}, 2500)
+// Drum constants
+export { NOTE, DRUM_CHANNEL } from './note'
+
+// Tab parser internals (advanced)
+export type {
+  ArticulationMap,
+  BlockHeader,
+  DocumentConfig,
+  InstrumentDef,
+  LineDef,
+  NoteSpec,
+  ParseError,
+  ParseResult,
+  Velocity,
+} from './tab/index'
+export { DRUMKIT_INSTRUMENTS, DRUMKIT_LINES } from './tab/drum'
+
+// MIDI export
+export { exportSongToMidi, type ExportConfig } from './export/midi'

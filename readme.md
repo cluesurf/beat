@@ -8,8 +8,7 @@
 
 <h3 align='center'>@cluesurf/beat</h3>
 <p align='center'>
-  TypeScript MIDI engine for drum tabs. Drives Logic Pro → Superior
-  Drummer 3 via the macOS IAC virtual MIDI bus.
+  A Codebase Producer
 </p>
 
 <br/>
@@ -18,20 +17,23 @@
 
 ## Introduction
 
+TypeScript MIDI engine for drum tabs. Drives Logic Pro → Superior
+Drummer 3 via the MacOS IAC virtual MIDI bus. Piece of cake.
+
 <img src="./text/view/part.png" width="512">
 
 Pro music tools sound real because real drummers don't play to grid:
 every hit moves a few milliseconds, every velocity drifts. **This repo
 is a plain-text drum-tab format that compiles to humanized MIDI** and
 streams it into Logic (or any DAW) over a virtual MIDI bus. You write
-some [simple tabs](./note/tab/drum.md), save the `something.beat` file,
-and Superior Drummer plays it back through your kit: with timing jitter,
-velocity ranges, swing, flams and accents already baked in.
+some [simple tabs](./note/tab/drum.md), save to a `something.beat` text
+file, and Superior Drummer plays it back through your kit: with timing
+jitter, velocity ranges, swing, flams and accents already baked in.
 
 ## Quickstart
 
 First, follow [`note/begin.md`](./note/begin.md) once to enable the
-macOS IAC virtual MIDI port and load Superior Drummer 3 in Logic. Then:
+MacOS IAC virtual MIDI port and load Superior Drummer 3 in Logic. Then:
 
 ```bash
 npm install -g @cluesurf/beat
@@ -69,17 +71,16 @@ import { readFileSync } from 'node:fs'
 import { parse, play } from '@cluesurf/beat'
 
 const beat = parse(readFileSync('./calm.beat', 'utf8'))
-const handle = play(beat.song, { loop: true })
+const stop = play(beat.song, { loop: true })
 
 // later:
-handle.stop()
-await handle.promise
+stop()
 ```
 
 `parse(text)` returns `{ song, hits, config, errors }` — the parsed Song
-plus any non-fatal parse warnings. `play(song, opts?)` returns
-`{ promise, stop }`. See [`code/index.ts`](./code/index.ts) for the full
-surface (`humanize`, `expandSong`, `exportSongToMidi`, `NOTE`, etc.).
+plus any non-fatal parse warnings. `play(song, opts?)` returns `stop`.
+See [`code/index.ts`](./code/index.ts) for the full surface (`humanize`,
+`expandSong`, `exportSongToMidi`, `NOTE`, etc.).
 
 ## What's in here
 
@@ -122,7 +123,7 @@ K|x---:----:x---:----|
 
 ## Running
 
-Prerequisite: macOS IAC bus configured + Logic Pro listening. Full setup
+Prerequisite: MacOS IAC bus configured + Logic Pro listening. Full setup
 at [`note/begin.md`](./note/begin.md).
 
 ```bash
