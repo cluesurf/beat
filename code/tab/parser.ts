@@ -81,6 +81,11 @@ export function parse(text: string): ParseResult {
   const arrangement: { pattern: string }[] = []
   let beatCursor = 0
   let barIndex = 0
+  // Track the active `part:` across blocks. Sticky — a block
+  // without `part:` inherits the previous one. When a new part
+  // starts, the local bar counter resets.
+  let currentPart: string | null = null
+  let localBarIndex = 0
 
   for (let blockIdx = 0; blockIdx < blocks.length; blockIdx++) {
     const blockText = blocks[blockIdx]
@@ -91,6 +96,10 @@ export function parse(text: string): ParseResult {
     )
     const block = resolveHeader(header, config, errors, blockIdx + 1)
     if (!block) continue
+    if (block.part && block.part !== currentPart) {
+      currentPart = block.part
+      localBarIndex = 0
+    }
     const beatsPerMeasure = computeBeatsPerMeasure(block)
     const positionsPerMeasure =
       block.measure.subdivisions * block.measure.pulses
@@ -127,6 +136,7 @@ export function parse(text: string): ParseResult {
 
     for (let m = 0; m < measureCount; m++) {
       barIndex++
+      localBarIndex++
       const measureHits: Hit[] = []
       for (const row of parsedRows) {
         const measure = row.measures[m]
@@ -138,7 +148,9 @@ export function parse(text: string): ParseResult {
       measureHits.sort((a, b) => a.beat - b.beat)
       allHits.push(...measureHits)
 
-      const patternName = `bar-${String(barIndex).padStart(3, '0')}`
+      const patternName = currentPart
+        ? `${currentPart}-${localBarIndex}`
+        : `bar-${String(barIndex).padStart(3, '0')}`
       patterns.push({
         name: patternName,
         beats: beatsPerMeasure,
@@ -169,6 +181,14 @@ export function parse(text: string): ParseResult {
 
 const MEASURE_KEY = /^measure\s*:/
 const TAB_ROW = /^\s*[A-Z][A-Za-z0-9-]*\s*\|/
+// Lines with these keys, when they appear immediately before a
+// `measure:` line (no blank line in between), get pulled into the
+// new block. Lets authors write:
+//   part: bridge-2
+//   measure: 4*5
+//   ...rows...
+// instead of having to remember to put `part:` after `measure:`.
+const BLOCK_HEADER_KEY = /^(part|time|tempo|humanize)\s*:/
 
 function splitDocument(text: string): {
   frontMatterText: string
@@ -182,7 +202,20 @@ function splitDocument(text: string): {
   for (const line of lines) {
     if (MEASURE_KEY.test(line.trimStart())) {
       if (current) blocks.push(current)
-      current = [line]
+      // Look back through the contiguous (non-blank, non-comment)
+      // tail of the previous bucket. Any block-header keys there
+      // belong to THIS new block, not the previous bucket.
+      const target = current ?? frontMatter
+      const pulled: string[] = []
+      while (target.length > 0) {
+        const last = target[target.length - 1]!
+        const trimmed = last.trim()
+        if (trimmed === '' || trimmed.startsWith('#')) break
+        if (!BLOCK_HEADER_KEY.test(last.trimStart())) break
+        pulled.unshift(last)
+        target.pop()
+      }
+      current = [...pulled, line]
     } else if (current) {
       current.push(line)
     } else {
@@ -394,6 +427,7 @@ function resolveHeader(
     time,
     tempo: asNumber(header.tempo) ?? config.tempo,
     humanize: asHumanize(header.humanize) ?? config.humanize,
+    part: asString(header.part),
   }
 }
 

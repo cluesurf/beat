@@ -11,7 +11,7 @@
     "play": "tsx code/console/index.ts play",
     "export": "tsx code/console/index.ts export",
     "text:make": "cd text && pnpm exec vsce package",
-    "text:load": "cd text && pnpm exec vsce package && code --install-extension $(ls -t beat-text-*.vsix | head -1)",
+    "text:load": "cd text && pnpm exec vsce package && (code --uninstall-extension cluesurf.beat-text || true) && code --install-extension $(ls -t beat-text-*.vsix | head -1)",
     "text:host": "cd text && pnpm exec vsce publish",
     "text:login": "cd text && pnpm exec vsce login cluesurf",
     "text:view": "cd text && pnpm view"

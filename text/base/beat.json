@@ -25,9 +25,9 @@
     "known-keys": {
       "patterns": [
         {
-          "match": "^\\s*(instrument|tempo|humanize|measure|time|velocity|hit|note|flam)\\s*(:)",
+          "match": "^\\s*(instrument|tempo|humanize|measure|time|part|velocity|hit|note|flam)\\s*(:)",
           "captures": {
-            "1": { "name": "keyword.control.beat" },
+            "1": { "name": "constant.language.beat" },
             "2": { "name": "punctuation.separator.key-value.beat" }
           }
         }
@@ -89,16 +89,24 @@
     "numbers": {
       "patterns": [
         {
-          "name": "constant.numeric.beat",
-          "match": "\\b\\d+(\\.\\d+)?\\b"
+          "match": "(\\d+)\\s*(\\*)\\s*(\\d+(?:\\.\\d+)?)",
+          "captures": {
+            "1": { "name": "entity.name.class.beat" },
+            "2": { "name": "comment.line.silence.beat" },
+            "3": { "name": "entity.name.class.beat" }
+          }
         },
         {
-          "name": "constant.numeric.measure-spec.beat",
-          "match": "\\d+\\s*\\*\\s*\\d+(\\.\\d+)?"
+          "match": "(\\d+)\\s*(/)\\s*(\\d+)",
+          "captures": {
+            "1": { "name": "entity.name.class.beat" },
+            "2": { "name": "comment.line.silence.beat" },
+            "3": { "name": "entity.name.class.beat" }
+          }
         },
         {
-          "name": "constant.numeric.time-signature.beat",
-          "match": "\\d+\\s*/\\s*\\d+"
+          "name": "entity.name.class.beat",
+          "match": "(?<![A-Za-z0-9_-])\\d+(\\.\\d+)?(?![A-Za-z_-])"
         }
       ]
     },
@@ -121,34 +129,34 @@
     "tab-row": {
       "begin": "^(\\s*)([A-Z][A-Za-z0-9]*)(\\|)",
       "beginCaptures": {
-        "2": { "name": "entity.name.section.line-name.beat" },
-        "3": { "name": "punctuation.separator.measure.beat" }
+        "2": { "name": "keyword.operator.line-name.beat" },
+        "3": { "name": "keyword.operator.measure.beat" }
       },
       "end": "$",
       "name": "meta.tab-row.beat",
       "patterns": [
         {
-          "name": "punctuation.separator.measure.beat",
+          "name": "keyword.operator.measure.beat",
           "match": "\\|"
         },
         {
-          "name": "punctuation.separator.beat.beat",
+          "name": "keyword.operator.beat.beat",
           "match": ":"
         },
         {
-          "name": "comment.tab.silence.beat",
+          "name": "comment.line.silence.beat",
           "match": "-+"
         },
         {
-          "name": "support.constant.tab-note.accent.beat",
+          "name": "entity.name.function.tab-note.accent.beat",
           "match": "[OXJB]"
         },
         {
-          "name": "constant.character.tab-note.beat",
+          "name": "entity.name.function.tab-note.beat",
           "match": "[xobcdgfr]"
         },
         {
-          "name": "constant.character.tab-note.combining.beat",
+          "name": "entity.name.function.tab-note.combining.beat",
           "match": "[a-zA-Z][\\u0300-\\u036f]+"
         },
         {

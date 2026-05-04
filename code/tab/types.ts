@@ -41,6 +41,10 @@ export type BlockHeader = {
   time?: { numerator: number; denominator: number }
   tempo?: number
   humanize?: HumanizeConfig
+  // Section name (e.g., "intro", "bridge-2"). Inherits from the
+  // previous block when omitted. Used to name patterns and group
+  // bars in the bar log.
+  part?: string
 }
 
 export type DocumentConfig = {

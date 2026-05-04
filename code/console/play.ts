@@ -32,6 +32,8 @@ type Args = {
   seed?: number
   from?: number
   to?: number
+  part?: string
+  measure?: number
   silentBars: boolean
   format: string
 }
@@ -88,6 +90,16 @@ export const playCommand: CommandModule<unknown, Args> = {
       .option('to', {
         type: 'number',
         describe: 'Stop after this bar (1-indexed, inclusive)',
+      })
+      .option('part', {
+        type: 'string',
+        describe:
+          'Play just this section (e.g. "bridge-2"). Pairs with --measure to start mid-section.',
+      })
+      .option('measure', {
+        type: 'number',
+        describe:
+          'Used with --part: start at the Nth measure of that part (1-indexed).',
       })
       .option('silentBars', {
         type: 'boolean',
@@ -198,11 +210,42 @@ async function runPlay(args: Args): Promise<void> {
 
     const allBars = expandArrangement(song)
 
-    // --from / --to slice the arrangement by bar number. Compute
-    // the start/end beat window from the chosen bars, filter the
-    // hits to that window, and shift everything to start at 0.
-    const fromBar = args.from ?? 1
-    const toBar = args.to ?? allBars.length
+    // --part / --measure resolve into --from / --to bar numbers.
+    // Pattern names from the tab parser look like "<part>-<n>",
+    // so we filter by name prefix.
+    let fromBar = args.from ?? 1
+    let toBar = args.to ?? allBars.length
+
+    if (args.part) {
+      const partBars = allBars.filter(b =>
+        b.patternName.startsWith(`${args.part}-`),
+      )
+      if (partBars.length === 0) {
+        const known = [
+          ...new Set(
+            allBars.map(b => b.patternName.replace(/-\d+$/, '')),
+          ),
+        ]
+          .sort()
+          .join(', ')
+        throw new Error(
+          `--part "${args.part}" not found in "${song.name}". ` +
+            `Known parts: ${known}`,
+        )
+      }
+      const measureWithinPart = args.measure ?? 1
+      if (measureWithinPart < 1 || measureWithinPart > partBars.length) {
+        throw new Error(
+          `--measure ${measureWithinPart} out of range for part "${args.part}" ` +
+            `(1..${partBars.length})`,
+        )
+      }
+      fromBar = partBars[measureWithinPart - 1]!.totalBar
+      // If only --part (no --measure, no --to), bound to end of part.
+      if (args.to === undefined && args.measure === undefined) {
+        toBar = partBars[partBars.length - 1]!.totalBar
+      }
+    }
     if (fromBar < 1 || fromBar > allBars.length) {
       throw new Error(
         `--from ${fromBar} out of range (1..${allBars.length})`,

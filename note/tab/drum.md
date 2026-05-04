@@ -46,9 +46,11 @@ Per-line defaults. Override in front matter only what differs.
 | Char | Hit   | Velocity     |
 | ---- | ----- | ------------ |
 | `x`  | wired | 95           |
-| `O`  | wired | 118 (accent) |
+| `X`  | wired | 118 (accent) |
 | `o`  | ghost | 30           |
-| `x́`  | rim   | 110          |
+| `O`  | ghost | 80 (accent)  |
+| `x́`  | rim   | 100          |
+| `X́`  | rim   | 120 (accent) |
 | `x̃`  | roll  | 80           |
 | `f`  | wired | 105 + flam   |
 
