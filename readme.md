@@ -35,7 +35,9 @@ jitter, velocity ranges, swing, flams and accents already baked in.
 ## Quickstart
 
 First, follow [`note/begin.md`](./note/begin.md) once to enable the
-MacOS IAC virtual MIDI port and load Superior Drummer 3 in Logic. Then:
+MacOS IAC virtual MIDI port and load Superior Drummer 3 in Logic.
+
+Then:
 
 ```bash
 npm install -g @cluesurf/beat
