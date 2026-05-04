@@ -18,7 +18,7 @@
 
 ## Introduction
 
-<img src="./text/view/part.png" width="468">
+<img src="./text/view/part.png" width="512">
 
 ## What's in here
 
