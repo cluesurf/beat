@@ -18,7 +18,7 @@
 
 ## Introduction
 
-![intro drum part to Tool - The Grudge](./text/view/part.png)
+<img src="./text/view/part.png" width="468">
 
 ## What's in here
 
