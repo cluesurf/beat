@@ -18,7 +18,9 @@
 ## Introduction
 
 TypeScript MIDI engine for drum tabs. Drives Logic Pro → Superior
-Drummer 3 via the MacOS IAC virtual MIDI bus. Piece of cake.
+Drummer 3 via the MacOS IAC virtual MIDI bus.
+
+Piece of cake 🤩🚀🎧.
 
 <img src="./text/view/part.png" width="512">
 
