@@ -1,0 +1,25 @@
+!*.sql
+.env
+/lock
+/shed
+auth.json
+
+# Override global `~/.gitignore_global` patterns (e.g. `ENV/`
+# meant for Python virtualenvs) that would otherwise silently
+# exclude legitimate `env/` source directories on macOS where
+# git matches gitignore patterns case-insensitively.
+!**/code/tool/env/
+!**/code/tool/env/**
+
+# Turborepo local cache. Stores per-task input hashes and cached
+# outputs. Safe to delete; turbo regenerates on next run.
+.turbo
+
+# Generated package output. Each `deck/<pkg>/host/` is the
+# build product; `host.prev/`, `host.next/`, `host.bak/` etc.
+# are throwaway snapshots. None of it belongs in git.
+host/
+host.*/
+**/host/
+**/host.*/
+.host-build/

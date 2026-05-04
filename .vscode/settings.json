@@ -1,0 +1,27 @@
+{
+  "typescript.preferences.includePackageJsonAutoImports": "auto",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "typescript.suggest.autoImports": true,
+  "typescript.preferences.allowIncompleteCompletions": true,
+  "typescript.workspaceSymbols.scope": "allOpenProjects",
+  "typescript.suggest.includeAutomaticOptionalChainCompletions": true,
+  "typescript.tsc.autoDetect": "on",
+  "typescript.preferences.useLabelDetailsInCompletionEntries": true,
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "typescript.validate.enable": true,
+  "typescript.suggest.completeFunctionCalls": true,
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "css.lint.unknownAtRules": "ignore",
+  "scss.lint.unknownAtRules": "ignore",
+  "less.lint.unknownAtRules": "ignore",
+  "files.associations": {
+    "*.css": "tailwindcss"
+  }
+}

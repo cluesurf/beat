@@ -1,0 +1,26 @@
+packages:
+  - 'code'
+
+# Centralized version pins. Sub-packages reference these via
+# `"<pkg>": "catalog:"` in their own package.json so a version
+# bump only happens here. Mirrors the mesh repo's pattern.
+catalog:
+  '@cluesurf/wash': 0.8.0
+  '@types/fs-extra': 11.0.4
+  '@types/node': 25.6.0
+  '@types/yargs': 17.0.35
+  concurrently: 9.2.1
+  dotenv: 17.4.2
+  easymidi: 3.1.0
+  fs-extra: 11.3.4
+  js-yaml: 4.1.1
+  kysely-codegen: 0.20.0
+  opentype.js: 1.3.4
+  tsc-alias: 1.8.16
+  tsx: 4.21.0
+  turbo: ^2.6.2
+  typescript: 5.9.3
+  vite: 8.0.8
+  vitest: 4.1.4
+  yargs: 18.0.0
+  zod: 4.3.6
