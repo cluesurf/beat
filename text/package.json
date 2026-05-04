@@ -1,0 +1,78 @@
+{
+  "name": "beat-text",
+  "icon": "view/beat.png",
+  "displayName": "BeatText",
+  "description": "BeatText Syntax Highlighter for .beat tab files",
+  "version": "1.0.0",
+  "license": "MIT",
+  "publisher": "cluesurf",
+  "scripts": {
+    "dock": "vsce login cluesurf",
+    "make": "vsce package",
+    "host": "vsce publish",
+    "view": "convert -background none -resize 1024x view/beat.svg view/beat.png"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cluesurf/beat.git"
+  },
+  "engines": {
+    "vscode": "^1.59.0"
+  },
+  "categories": ["Programming Languages"],
+  "activationEvents": ["workspaceContains:**/*.beat"],
+  "devDependencies": {
+    "prettier": "3.8.1"
+  },
+  "contributes": {
+    "iconThemes": [
+      {
+        "id": "beat",
+        "label": "Beat",
+        "path": "./view/view.json"
+      }
+    ],
+    "configurationDefaults": {
+      "[beat]": {
+        "editor.wordWrap": "off",
+        "editor.quickSuggestions": {
+          "other": true,
+          "comments": false,
+          "strings": false
+        },
+        "editor.tabCompletion": "on",
+        "editor.wordSeparators": " :|",
+        "editor.bracketPairColorization.enabled": false,
+        "editor.renderWhitespace": "boundary",
+        "editor.fontFamily": "Menlo, monospace"
+      }
+    },
+    "languages": [
+      {
+        "id": "beat",
+        "aliases": ["Beat", "BeatText", "beat"],
+        "extensions": [".beat"],
+        "configuration": "./base/bind.json"
+      },
+      {
+        "id": "beat-markdown-injection"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "beat",
+        "scopeName": "source.beat",
+        "path": "./base/beat.json"
+      },
+      {
+        "language": "beat-markdown-injection",
+        "scopeName": "markdown.beat.codeblock",
+        "path": "./base/mark.json",
+        "injectTo": ["text.html.markdown"],
+        "embeddedLanguages": {
+          "meta.embedded.block.beat": "beat"
+        }
+      }
+    ]
+  }
+}

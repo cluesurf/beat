@@ -7,8 +7,8 @@ import { openDrumOutput } from '@/code/output'
 import { sendHit } from '@/code/hit'
 import { NOTE } from '@/code/note'
 
-export const bootCommand: CommandModule = {
-  command: 'boot',
+export const tryCommand: CommandModule = {
+  command: 'try',
   describe: 'Hello-world: send 4 drum hits',
   handler: async () => {
     const output = openDrumOutput()

@@ -1,0 +1,161 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "BeatCode",
+  "scopeName": "source.beat",
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#tab-row" },
+    { "include": "#known-keys" },
+    { "include": "#yaml-key" },
+    { "include": "#yaml-array" },
+    { "include": "#yaml-object" },
+    { "include": "#numbers" },
+    { "include": "#strings" }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.number-sign.beat",
+          "match": "(^|\\s)#.*$"
+        }
+      ]
+    },
+
+    "known-keys": {
+      "patterns": [
+        {
+          "match": "^\\s*(instrument|tempo|humanize|measure|time|velocity|hit|note|flam)\\s*(:)",
+          "captures": {
+            "1": { "name": "keyword.control.beat" },
+            "2": { "name": "punctuation.separator.key-value.beat" }
+          }
+        }
+      ]
+    },
+
+    "yaml-key": {
+      "patterns": [
+        {
+          "match": "^\\s*([A-Za-z_][A-Za-z0-9_-]*)\\s*(:)(?!\\|)",
+          "captures": {
+            "1": { "name": "entity.name.tag.beat" },
+            "2": { "name": "punctuation.separator.key-value.beat" }
+          }
+        }
+      ]
+    },
+
+    "yaml-array": {
+      "begin": "\\[",
+      "end": "\\]",
+      "beginCaptures": {
+        "0": { "name": "punctuation.definition.array.begin.beat" }
+      },
+      "endCaptures": {
+        "0": { "name": "punctuation.definition.array.end.beat" }
+      },
+      "patterns": [
+        { "include": "#numbers" },
+        { "include": "#strings" },
+        {
+          "match": ",",
+          "name": "punctuation.separator.array.beat"
+        }
+      ]
+    },
+
+    "yaml-object": {
+      "begin": "\\{",
+      "end": "\\}",
+      "beginCaptures": {
+        "0": { "name": "punctuation.definition.dictionary.begin.beat" }
+      },
+      "endCaptures": {
+        "0": { "name": "punctuation.definition.dictionary.end.beat" }
+      },
+      "patterns": [
+        { "include": "#known-keys" },
+        { "include": "#yaml-key" },
+        { "include": "#numbers" },
+        { "include": "#strings" },
+        {
+          "match": ",",
+          "name": "punctuation.separator.dictionary.pair.beat"
+        }
+      ]
+    },
+
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.beat",
+          "match": "\\b\\d+(\\.\\d+)?\\b"
+        },
+        {
+          "name": "constant.numeric.measure-spec.beat",
+          "match": "\\d+\\s*\\*\\s*\\d+(\\.\\d+)?"
+        },
+        {
+          "name": "constant.numeric.time-signature.beat",
+          "match": "\\d+\\s*/\\s*\\d+"
+        }
+      ]
+    },
+
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.beat",
+          "begin": "\"",
+          "end": "\""
+        },
+        {
+          "name": "string.quoted.single.beat",
+          "begin": "'",
+          "end": "'"
+        }
+      ]
+    },
+
+    "tab-row": {
+      "begin": "^(\\s*)([A-Z][A-Za-z0-9]*)(\\|)",
+      "beginCaptures": {
+        "2": { "name": "entity.name.section.line-name.beat" },
+        "3": { "name": "punctuation.separator.measure.beat" }
+      },
+      "end": "$",
+      "name": "meta.tab-row.beat",
+      "patterns": [
+        {
+          "name": "punctuation.separator.measure.beat",
+          "match": "\\|"
+        },
+        {
+          "name": "punctuation.separator.beat.beat",
+          "match": ":"
+        },
+        {
+          "name": "comment.tab.silence.beat",
+          "match": "-+"
+        },
+        {
+          "name": "support.constant.tab-note.accent.beat",
+          "match": "[OXJB]"
+        },
+        {
+          "name": "constant.character.tab-note.beat",
+          "match": "[xobcdgfr]"
+        },
+        {
+          "name": "constant.character.tab-note.combining.beat",
+          "match": "[a-zA-Z][\\u0300-\\u036f]+"
+        },
+        {
+          "name": "invalid.illegal.tab-note.beat",
+          "match": "[^\\s|:o\\-xOXJBcdgfr\\u0300-\\u036f]"
+        }
+      ]
+    }
+  }
+}

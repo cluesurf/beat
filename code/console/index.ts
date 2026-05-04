@@ -9,18 +9,20 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import { playCommand } from './play'
-import { bootCommand } from './boot'
+import { tryCommand } from './try'
 import { loopCommand } from './loop'
 import { listPortsCommand } from './list-ports'
 import { testAllCommand } from './test-all'
+import { exportCommand } from './export'
 
 await yargs(hideBin(process.argv))
   .scriptName('beat')
   .command(playCommand)
-  .command(bootCommand)
+  .command(tryCommand)
   .command(loopCommand)
   .command(listPortsCommand)
   .command(testAllCommand)
+  .command(exportCommand)
   .demandCommand(1)
   .strict()
   .help()
