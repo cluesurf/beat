@@ -124,7 +124,7 @@ Prerequisite: MacOS IAC bus configured + Logic Pro listening. Full setup
 at [`note/begin.md`](./note/begin.md).
 
 ```bash
-pnpm list:ports                              # verify "TS Drum Engine" port
+pnpm check                                   # verify "TS Drum Engine" port
 pnpm try                                     # quick sanity hit
 pnpm play                                    # default song
 pnpm play tool/grudge                        # play a specific song

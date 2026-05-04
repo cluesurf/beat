@@ -15,7 +15,7 @@
   "files": ["host", "readme.md", "license.md"],
   "scripts": {
     "try": "tsx code/console/index.ts try",
-    "list:ports": "tsx code/console/index.ts list-ports",
+    "check": "tsx code/console/index.ts list-ports",
     "play": "tsx code/console/index.ts play",
     "export": "tsx code/console/index.ts export",
     "text:make": "cd text && pnpm exec vsce package",
