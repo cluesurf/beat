@@ -100,10 +100,6 @@ pnpm play <name>        # play beat/base/song/<name>/index.ts
 
 ## Roadmap (matches the architecture doc)
 
-The full roadmap — humanization, layering, polyrhythms, pad remapping,
-multi-channel routing — is in
-`note/music/making/typescript-midi-logic-architecture.md`.
-
 Done so far:
 
 - IAC port discovery

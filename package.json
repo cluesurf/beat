@@ -6,14 +6,19 @@
   "description": "TypeScript MIDI engine that drives Logic Pro / Superior Drummer 3 via the macOS IAC virtual MIDI bus.",
   "type": "module",
   "scripts": {
-    "boot": "tsx code/index.ts",
-    "boot:loop": "tsx code/loop.ts",
-    "list:ports": "tsx code/list-ports.ts",
-    "play": "tsx code/play.ts"
+    "cli": "tsx code/console/index.ts",
+    "boot": "tsx code/console/index.ts boot",
+    "boot:loop": "tsx code/console/index.ts loop",
+    "list:ports": "tsx code/console/index.ts list-ports",
+    "play": "tsx code/console/index.ts play",
+    "test:all": "tsx code/console/index.ts test-all"
   },
   "prettier": "@cluesurf/wash/flow.json",
   "dependencies": {
-    "easymidi": "catalog:"
+    "@types/lodash-es": "catalog:",
+    "easymidi": "catalog:",
+    "lodash-es": "catalog:",
+    "yargs": "catalog:"
   },
   "devDependencies": {
     "@cluesurf/wash": "catalog:",
