@@ -282,15 +282,21 @@ T4|---o:-o--:----:----:o-o-|---o:-o--:----:----:o-o-|
 T5|o--o:-o--:o---:----:o-o-|o--o:-o--:o---:----:o-o-|
  K|o-oo:-o-o:o-dd:-dd-:o-o-|o-oo:-o-o:o-d-:d---:o-o-|
 
-# Bar 5 (3/4 extended; uses the "1 t l" triplet pickup at end —
-# rendered as a plain 3/4 bar here, the trailing pickup absorbed
-# into the kit fill)
+# Bar 5 (3/4 — 12-char half of the original "extended" bar)
 measure: 4*3
- S|----:----:----:o---|
-T1|o---:----:o---:--oo|
-T4|---o:-o--:----:----|
-T5|o--o:-o--:o---:----|
- K|o-oo:-o-o:o--d:----|
+ S|----:----:----|
+T1|o---:----:o---|
+T4|---o:-o--:----|
+T5|o--o:-o--:o---|
+ K|o-oo:-o-o:o--d|
+
+# Bar 5b — triplet pickup ("1 t l" / 6-char half).
+# 1 pulse × 6 sub-positions = sextuplet 16ths.
+measure: 6*1
+ S|o-----|
+T2|-o----|
+T1|--oo--|
+T4|----oo|
 
 # Bar 6 (3/4)
 measure: 4*3

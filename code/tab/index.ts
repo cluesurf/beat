@@ -3,6 +3,7 @@
 // Type imports for the result shape live alongside.
 
 export { parse } from './parser'
+export { load } from './load'
 export type {
   ArticulationMap,
   BlockHeader,

@@ -1,117 +1,116 @@
-# beat
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
 
-TypeScript MIDI engine. Drives Logic Pro → Superior Drummer 3 via the
-macOS IAC virtual MIDI bus.
+<h3 align='center'>@cluesurf/beat</h3>
+<p align='center'>
+  TypeScript MIDI engine for drum tabs. Drives Logic Pro → Superior
+  Drummer 3 via the macOS IAC virtual MIDI bus.
+</p>
+
+<br/>
+<br/>
+<br/>
+
+## What's in here
 
 ```
 beat/
-├── package.json          # workspace root, deps via catalog:
-├── pnpm-workspace.yaml   # pnpm catalog (single-package workspace)
-├── tsconfig.json         # `@/*` → repo root
-├── code/                 # engine
-└── base/
-    └── song/
-        └── <song-name>/
-            └── index.ts  # exports default Song
+├── code/             # the engine (parser, scheduler, MIDI export, humanize)
+├── test/             # songs (each in text.beat / code.ts / data.ts forms)
+├── text/             # the .beat VS Code syntax-highlighter extension
+├── note/             # docs (spec, drum defaults, roadmap, syntax, etc.)
+├── package.json
+├── pnpm-workspace.yaml
+├── tsconfig.json
+└── vitest.config.ts
 ```
 
-## Song architecture
+## Songs
 
-A **song lives at `beat/base/song/<song-name>/index.ts`** and
-default-exports a `Song`. The player loads it dynamically.
+A song lives at `test/<name>/` and may exist in three equivalent
+representations:
 
-```ts
-// beat/base/song/<song-name>/index.ts
-import type { Song } from '@/code/song'
-import { NOTE } from '@/code/note'
+| File         | What it is                                  |
+| ------------ | ------------------------------------------- |
+| `text.beat`  | ASCII drum tab — see [`note/tab/spec.md`](./note/tab/spec.md) and [`note/tab/drum.md`](./note/tab/drum.md) |
+| `code.ts`    | Imperative TypeScript DSL (NOTE constants)  |
+| `data.ts`    | Pure data (raw MIDI note numbers)           |
 
-const song: Song = {
-  name: 'My Song',
-  bpm: 120,
-  patterns: [
-    {
-      name: 'verse',
-      beats: 4,
-      hits: [
-        { beat: 0, note: NOTE.kick, velocity: 110 },
-        { beat: 1, note: NOTE.snare, velocity: 115 },
-        { beat: 2, note: NOTE.kick, velocity: 105 },
-        { beat: 3, note: NOTE.snare, velocity: 118 },
-      ],
-    },
-  ],
-  arrangement: [{ pattern: 'verse', repeat: 8 }],
-}
+`pnpm play <name>` picks the first format it finds (`text.beat` first by
+default). Override with `--format beat | code | data | text`.
 
-export default song
+```beat
+# test/basic/text.beat
+instrument: drumkit
+tempo: 100
+
+measure: 4*4
+H|x-x-:x-x-:x-x-:x-x-|
+S|----:x---:----:x---|
+K|x---:----:x---:----|
 ```
-
-### Song shape
-
-| Field         | Type      | Why                                                   |
-| ------------- | --------- | ----------------------------------------------------- |
-| `name`        | string    | Display + log identifier                              |
-| `bpm`         | number    | Tempo. Lets you change speed without rewriting beats  |
-| `channel`     | number?   | Default MIDI channel for any hit that doesn't set one |
-| `patterns`    | Pattern[] | Reusable phrase library                               |
-| `arrangement` | Section[] | Order to play patterns in                             |
-
-### Pattern shape
-
-| Field   | Why                                                           |
-| ------- | ------------------------------------------------------------- |
-| `name`  | Lookup key referenced from `arrangement`                      |
-| `beats` | Loop length. A 4/4 one-bar pattern is `4`                     |
-| `hits`  | List of hits with beat-position relative to the pattern start |
-
-### Hit shape
-
-| Field        | Default        | Notes                                                                |
-| ------------ | -------------- | -------------------------------------------------------------------- |
-| `beat`       | required       | Position within the pattern. Sub-beats fine: `0.5` = "and" of beat 1 |
-| `note`       | required       | Use `NOTE.kick` etc. from `@/code/note`                              |
-| `velocity`   | 110            | 1-127                                                                |
-| `durationMs` | 120            | Drums don't really care; SD3 plays the sample to its tail            |
-| `channel`    | 9 (MIDI ch 10) | Override per hit to route to another sampler track                   |
-
-### Why patterns + arrangement (not a flat hit list)
-
-Songs are repetitive. Verse plays 4×, chorus 2×, verse again 4×. Storing
-the literal hits 10× over would make edits brittle — change the verse
-and you'd touch 4 places. The `patterns + arrangement` split lets you
-edit a verse once and have the song rebuild itself.
-
-If you ever want the flat hit list (e.g. to export to MIDI file), call
-`expandSong(song)` from `code/song.ts` — it flattens into absolute beat
-positions.
 
 ## Running
 
 Prerequisite: macOS IAC bus configured + Logic Pro listening. Full setup
-at `note/music/making/midi-hello-world.md`.
+at [`note/music/making/midi-hello-world.md`](./note/music/making/midi-hello-world.md).
 
 ```bash
-pnpm list:ports         # verify TS Drum Engine appears
-pnpm boot               # 4 hardcoded hits
-pnpm boot:loop          # endless kick/snare every 500ms
-pnpm play               # play default song (example)
-pnpm play <name>        # play beat/base/song/<name>/index.ts
+pnpm list:ports                              # verify "TS Drum Engine" port
+pnpm try                                     # quick sanity hit
+pnpm play                                    # default song
+pnpm play tool/grudge                        # play a specific song
+pnpm play tool/grudge --pattern bar-007      # solo one bar
+pnpm play tool/grudge --from 17 --to 32      # play a region
+pnpm play tool/grudge --humanize loose       # drag + jitter
+pnpm export tool/grudge                      # write a .mid file
 ```
 
-## Roadmap (matches the architecture doc)
+## Syntax highlighter
 
-Done so far:
+The VS Code extension lives in [`text/`](./text). Top-level scripts:
 
-- IAC port discovery
-- Canonical note map
-- Hit / Pattern / Song types
-- Arrangement expansion
-- Static song player
+```bash
+pnpm text:make    # build the .vsix
+pnpm text:load    # build + install into VS Code
+pnpm text:login   # vsce login cluesurf (one-time)
+pnpm text:host    # publish to the marketplace
+```
 
-Next:
+See [`note/syntax.md`](./note/syntax.md) for the full layout, scope
+table, and dev loop.
 
-- `code/humanize.ts` — controlled timing + velocity jitter
-- `code/layers.ts` — one source hit → many outputs
-- `code/polyrhythm.ts` — generate N-against-M phrases
-- `code/midi-input.ts` — listen to SPD-SX, remap, re-emit
-- `code/export.ts` — save the played MIDI as a .mid file
+## Tests
+
+```bash
+pnpm exec vitest run             # 31 tests covering the tab parser
+```
+
+## Docs
+
+- [`note/tab/spec.md`](./note/tab/spec.md) — generic tab format spec
+- [`note/tab/drum.md`](./note/tab/drum.md) — drumkit defaults
+- [`note/superior-drummer-control.md`](./note/superior-drummer-control.md) — what SD3 lets us program
+- [`note/tool-drum-sound.md`](./note/tool-drum-sound.md) — Tool-style SD3 setup
+- [`note/syntax.md`](./note/syntax.md) — `.beat` syntax highlighter
+- [`note/roadmap.md`](./note/roadmap.md) — what's next
+
+## License
+
+MIT
+
+## ClueSurf
+
+Made by [ClueSurf](https://clue.surf), meditating on the universe ¤.
+Follow the work on [YouTube](https://youtube.com/@cluesurf),
+[X](https://x.com/cluesurf),
+[Instagram](https://instagram.com/cluesurf),
+[Substack](https://cluesurf.substack.com),
+[Facebook](https://facebook.com/cluesurf), and
+[LinkedIn](https://linkedin.com/company/cluesurf), and browse more of
+our open-source work here on [GitHub](https://github.com/cluesurf).

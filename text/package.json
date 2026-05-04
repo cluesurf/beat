@@ -20,7 +20,6 @@
     "vscode": "^1.59.0"
   },
   "categories": ["Programming Languages"],
-  "activationEvents": ["workspaceContains:**/*.beat"],
   "devDependencies": {
     "prettier": "3.8.1"
   },

@@ -1,6 +1,6 @@
 # Tab Format Spec
 
-Generic, instrument-agnostic ASCII tab format. Pluggable instrument
+Generic, instrument-agnostic text tab format. Pluggable instrument
 defaults make a drumkit tab (`instrument: drumkit`) the same parser as a
 guitar tab (`instrument: guitar`), a piano tab, etc.
 

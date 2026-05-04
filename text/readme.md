@@ -8,7 +8,7 @@
 
 <h3 align='center'>@cluesurf/beat-code</h3>
 <p align='center'>
-  The VSCode Syntax Highlighter for <a href="https://github.com/cluesurf/beat">.beat drum tab files</a>
+  The VSCode Syntax Highlighter for <a href="https://github.com/cluesurf/beat"><code>.beat</code> tab files</a>
 </p>
 
 <br/>
@@ -34,21 +34,21 @@ The grammar colorizes:
 - **Comments** — `# ...` (line comments)
 - **Known YAML keys** — `instrument`, `tempo`, `humanize`, `measure`,
   `time`, `velocity`, `hit`, `note`, `flam`
-- **Custom YAML keys** — uppercase line names (`H`, `S`, `T1`, etc.)
-  and inline note overrides
-- **Numbers** — including measure specs (`4*5`) and time
-  signatures (`5/8`)
+- **Custom YAML keys** — uppercase line names (`H`, `S`, `T1`, etc.) and
+  inline note overrides
+- **Numbers** — including measure specs (`4*5`) and time signatures
+  (`5/8`)
 - **Tab rows** — line names + `|` measure separators + `:` beat
   separators
-- **Note characters** — main hits (`x`, `o`, `b`, `c`, `d`, `f`,
-  `g`, `r`) vs. accents (`O`, `X`, `J`, `B`)
-- **Combining diacritics** — `x̣`, `x́`, `x̃`, `ẋ` highlighted as
-  custom note slots
-- **Silence** — `-` rendered as a comment color so the rhythmic
-  pattern stands out
+- **Note characters** — main hits (`x`, `o`, `b`, `c`, `d`, `f`, `g`,
+  `r`) vs. accents (`O`, `X`, `J`, `B`)
+- **Combining diacritics** — `x̣`, `x́`, `x̃`, `ẋ` highlighted as custom
+  note slots
+- **Silence** — `-` rendered as a comment color so the rhythmic pattern
+  stands out
 
-Markdown injection: triple-backtick `beat` blocks inside `.md` files
-are highlighted via the `markdown.beat.codeblock` injection grammar.
+Markdown injection: triple-backtick `beat` blocks inside `.md` files are
+highlighted via the `markdown.beat.codeblock` injection grammar.
 
 ## Development
 
@@ -66,8 +66,10 @@ To publish, get an access token by following
 
 - The organization for the access token is at
   [ClueSurf](https://dev.azure.com/cluesurf).
-- VSCode Marketplace profile: [aex.dev.azure.com/me](https://aex.dev.azure.com/me?mkt=en-US).
-- VSCode package page for ClueSurf: [marketplace publishers/cluesurf](https://marketplace.visualstudio.com/manage/publishers/cluesurf).
+- VSCode Marketplace profile:
+  [aex.dev.azure.com/me](https://aex.dev.azure.com/me?mkt=en-US).
+- VSCode package page for ClueSurf:
+  [marketplace publishers/cluesurf](https://marketplace.visualstudio.com/manage/publishers/cluesurf).
 
 ## License
 

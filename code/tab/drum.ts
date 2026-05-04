@@ -37,6 +37,9 @@ export const DRUMKIT_INSTRUMENTS: Record<string, InstrumentDef> = {
       o: { hit: 'open' },
       O: { hit: 'open', velocity: 115 },
       X: { hit: 'closed', velocity: 110 },
+      d: { hit: 'closed', velocity: 60 },
+      g: { hit: 'closed', velocity: 30 },
+      r: { hit: 'closed', velocity: 70 },
     },
   },
 
@@ -67,6 +70,9 @@ export const DRUMKIT_INSTRUMENTS: Record<string, InstrumentDef> = {
       x́: { hit: 'rim', velocity: 110 },
       x̃: { hit: 'roll', velocity: 80 },
       f: { hit: 'wired', velocity: 105, flam: 0.04 },
+      g: { hit: 'ghost', velocity: 25 },
+      d: { hit: 'wired', velocity: 60 },
+      r: { hit: 'roll', velocity: 70 },
     },
   },
 
@@ -80,6 +86,8 @@ export const DRUMKIT_INSTRUMENTS: Record<string, InstrumentDef> = {
       o: { hit: 'main' },
       O: { hit: 'main', velocity: 120 },
       d: { hit: 'main', velocity: 60 },
+      g: { hit: 'main', velocity: 30 },
+      f: { hit: 'main', velocity: 105, flam: 0.04 },
     },
   },
 
@@ -110,6 +118,9 @@ export const DRUMKIT_INSTRUMENTS: Record<string, InstrumentDef> = {
       b: { hit: 'bell', velocity: 105 },
       O: { hit: 'tip', velocity: 115 },
       c: { hit: 'choke', velocity: 1 },
+      g: { hit: 'tip', velocity: 30 },
+      d: { hit: 'tip', velocity: 60 },
+      r: { hit: 'tip', velocity: 70 },
     },
   },
 }
@@ -127,6 +138,9 @@ function singleArticulationTom(
       x: { hit: 'main' },
       o: { hit: 'main' },
       O: { hit: 'main', velocity: 118 },
+      f: { hit: 'main', velocity: 105, flam: 0.04 },
+      g: { hit: 'main', velocity: 30 },
+      d: { hit: 'main', velocity: 60 },
     },
   }
 }
@@ -146,6 +160,9 @@ function cymbal(
       X: { hit: 'main', velocity: 120 },
       O: { hit: 'main', velocity: 120 },
       c: { hit: 'choke', velocity: 1 },
+      g: { hit: 'main', velocity: 30 },
+      d: { hit: 'main', velocity: 60 },
+      r: { hit: 'main', velocity: 70 },
     },
   }
 }
