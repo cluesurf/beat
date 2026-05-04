@@ -78,7 +78,12 @@ for the design.
 
 ## Programmatic API
 
-Same engine, called from your own TypeScript:
+Same engine, called from your own TypeScript. Two equivalent ways to
+hand the engine a Song.
+
+### Text API
+
+Parse a `.beat` text. The file format is the same one the CLI reads.
 
 ```ts
 import { readFileSync } from 'node:fs'
@@ -87,10 +92,53 @@ import { parse, play } from '@cluesurf/beat'
 const beat = parse(readFileSync('./calm.beat', 'utf8'))
 const stop = play(beat.song, { loop: true })
 
-stop() // whenever you want
+await stop() // whenever you want
 ```
 
-See [`code/index.ts`](./code/index.ts) for the full surface.
+`parse(text)` returns `{ song, hits, config, errors }`.
+
+### JSON API
+
+Skip the parser. Build the Song directly as data and pass it to `play`.
+
+```ts
+import { play, NOTE, type Song } from '@cluesurf/beat'
+
+const song: Song = {
+  name: 'Calm',
+  bpm: 88,
+  patterns: [
+    {
+      name: 'main',
+      beats: 4,
+      hits: [
+        { beat: 0, note: NOTE.crashLeft, velocity: 100 },
+        { beat: 0, note: NOTE.kick, velocity: 100 },
+        { beat: 1, note: NOTE.snare, velocity: 95 },
+        { beat: 1.5, note: NOTE.kick, velocity: 100 },
+        { beat: 2.5, note: NOTE.kick, velocity: 100 },
+        { beat: 3, note: NOTE.snare, velocity: 95 },
+        // 8th-note hi-hat
+        ...[0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5].map(beat => ({
+          beat,
+          note: NOTE.closedHat,
+          velocity: 78,
+        })),
+      ],
+    },
+  ],
+  arrangement: [{ pattern: 'main', repeat: 8 }],
+  humanize: { timing: 0.015, velocity: 6, timingBias: -0.1 },
+}
+
+const stop = play(song, { loop: true })
+await stop()
+```
+
+Same `Song` shape on both sides. The text parser is just a sugar layer
+over building this object directly. See
+[`code/index.ts`](./code/index.ts) for the full surface (`humanize`,
+`expandSong`, `exportSongToMidi`, `NOTE`, etc).
 
 ## What's in here
 
@@ -172,8 +220,8 @@ pnpm test                        # 31 tests covering the tab parser
 - [`note/tab/drum.md`](./note/tab/drum.md): drumkit defaults
 - [`note/superior-drummer-control.md`](./note/superior-drummer-control.md)
   : what SD3 lets us program
-- [`note/tool-drum-sound.md`](./note/tool-drum-sound.md): Tool-style SD3
-  setup
+- [`note/progressive-rock-drum-sound.md`](./note/progressive-rock-drum-sound.md):
+  Progressive Rock style SD3 setup
 - [`note/syntax.md`](./note/syntax.md): `.beat` syntax highlighter
 - [`note/roadmap.md`](./note/roadmap.md): what's next
 

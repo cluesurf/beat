@@ -1,7 +1,8 @@
-# Tool drum sound. Superior Drummer 3 setup
+# Progressive Rock Drum Sound: Superior Drummer 3 setup
 
 How to configure SD3 once, in the GUI, so the kit you trigger from
-`code/console/play.ts` actually sounds like Danny Carey.
+`code/console/play.ts` has the heavy progressive-rock sound: big melodic
+toms, dry woody snare, wide cymbal palette, and a tight room.
 
 Pieces required:
 
@@ -15,8 +16,6 @@ Pieces required:
 This is all GUI work in SD3. Save it as a preset when finished. The TS
 engine in `code/` plays it; SD3 makes the noise.
 
----
-
 ## 1. Load Progressive Foundry as the base kit
 
 ```
@@ -25,19 +24,19 @@ SD3 → Library tab
     → load preset "Progressive Foundry. Default"
 ```
 
-This gives you Danny's pickled wood Sonor kit, his cymbals, his rooms.
-It is the foundation. Everything else stacks on top.
+This gives you a pickled-wood Sonor kit, a deep cymbal selection, and
+Ocean Way room mics. It is the foundation. Everything else stacks on
+top.
 
-Why Progressive Foundry: it was sampled at Ocean Way with Carey's actual
-kit and Bob Clearmountain mics. Other Tool-adjacent sounds (Decades of
-Decadence, Death & Darkness) miss the dry, woody attack.
-
----
+Why Progressive Foundry: it was sampled at Ocean Way with Bob
+Clearmountain mics, geared toward dry, woody attack. Other heavy SDX
+libraries (Decades of Decadence, Death & Darkness) lean modern-metal and
+miss the prog-rock weight.
 
 ## 2. Snare. Add the raw layer
 
-Goal: Carey's snare reads as **woody crack** plus **tight sizzle**, not
-just one or the other.
+Goal: the snare reads as **woody crack** plus **tight sizzle**, not just
+one or the other.
 
 ```
 Drums tab → Snare slot
@@ -61,11 +60,10 @@ softer shell hit for ghost work. The ghost notes in `base/song/example`
 use `NOTE.snareRim`; map it to the raw snare's lightest layer in SD3's
 Mapping window so ghosts read as wood not as wire.
 
----
-
 ## 3. Toms. Eight total, tuned
 
-Default Progressive Foundry has 4 toms. Tool wants more. Two ways:
+Default Progressive Foundry has 4 toms. The prog-rock sound wants more
+melodic range. Two ways:
 
 ### Option A. Stack within existing slots
 
@@ -107,8 +105,8 @@ Drums tab → click tom slot → "Tuning" section
   → Pitch (semitones) + Fine (cents)
 ```
 
-A musical tom set, low → high, tuned to a chord (Carey often plays toms
-over an A drone or in fourths/fifths):
+A musical tom set, low → high, tuned to a chord (prog-rock players often
+pitch toms over a low drone, in fourths or fifths):
 
 | Tom        | Pitch       | Why                               |
 | ---------- | ----------- | --------------------------------- |
@@ -116,30 +114,28 @@ over an A drone or in fourths/fifths):
 | octoban hi | E5 (+12 st) | top of the rack                   |
 | concert 8″ | E4 (+0 st)  | tight high accents                |
 | rack 10″   | D4 (-2 st)  | melodic lead tom                  |
-| rack 12″   | A3 (-7 st)  | the "main" Lateralus tom voice    |
+| rack 12″   | A3 (-7 st)  | the "main" mid-tom voice          |
 | rack 14″   | F3 (-10 st) | descending fill                   |
 | floor 16″  | D3 (-12 st) | thunder                           |
-| floor 18″  | A2 (-17 st) | the "Forty-Six and 2" cannon      |
+| floor 18″  | A2 (-17 st) | the cannon                        |
 | gong drum  | E2 (-24 st) | sub-bass drum at the end of fills |
 
-Tune by ear against a piano. Carey's actual kit drifts; don't quantize
-to perfect equal temperament. Leave 5–15 cents off so the toms breathe.
+Tune by ear against a piano. Real kits drift; don't quantize to perfect
+equal temperament. Leave 5–15 cents off so the toms breathe.
 
-Save tuning as part of the preset: **File → Save Preset → "Tool
+Save tuning as part of the preset: **File → Save Preset → "Progressive
 (custom)"**.
-
----
 
 ## 4. Cymbals. Add china + secondary crashes + secondary ride
 
-Default Progressive Foundry: 2 crashes + ride + hat + splash. Tool needs
-more.
+Default Progressive Foundry: 2 crashes + ride + hat + splash. The
+prog-rock sound wants more.
 
 ```
 Cymbals tab
   → "Add cymbal"
     → from SDX library, load:
-        - Wuhan China 18″     (Carey's signature trash)
+        - Wuhan China 18″     (signature trash)
         - Sabian AAX Crash 19″ (right-side dark crash)
         - Paiste 2002 Crash 17″ (left-side bright)
         - Zildjian K Custom Ride 22″ (secondary ride for bell work)
@@ -167,8 +163,6 @@ Make sure each cymbal has its choke articulation mapped. SD3 default:
 directly. Useful for the bridge in `base/song/example`. Choke the crash
 on beat 5 instead of letting it ring.
 
----
-
 ## 5. Mixer. Get out of the way
 
 Dial in the room before adding any extra plugins.
@@ -185,24 +179,20 @@ Mixer tab
   → leave the cymbals alone except for HPF at 200 Hz
 ```
 
-For Carey-style "dry but big": **drop the room mics by 6 dB** from the
-PF default. He plays in a real room; you don't want the SDX sample- room
-to compete.
-
----
+For a "dry but big" prog-rock voice: **drop the room mics by 6 dB** from
+the PF default. The kit should sit forward in the mix; you don't want
+the SDX sample-room to swallow the close mics.
 
 ## 6. Save it
 
 ```
 File → Save Preset
-  → name: "Tool (custom)"
+  → name: "Progressive (custom)"
   → location: SD3 user presets folder
 ```
 
 From now on, recall it manually before running `pnpm play`. The TS
 engine plays whatever kit is currently loaded. It doesn't care which.
-
----
 
 ## 7. Update `code/note.ts` for the new pieces
 
@@ -225,8 +215,6 @@ Then your songs in `base/song/<name>/index.ts` can use them immediately.
 Verify with `pnpm play <name> --pattern <pattern>` to solo the section
 that exercises the new pieces.
 
----
-
 ## 8. Sanity check
 
 End-to-end test:
@@ -246,8 +234,6 @@ If a piece doesn't sound right, the issue is one of:
 - Stacked drum's velocity layer mismatched (too loud / too quiet)
 - Mixer mute on the bus
 - Tuning knob in semitones not cents (off by 100×)
-
----
 
 ## Bottom line
 
