@@ -18,7 +18,7 @@
 
 ## Introduction
 
-![intro drum part to Tool - The Grudge](./view/part.png)
+![intro drum part to Tool - The Grudge](./text/view/part.png)
 
 ## What's in here
 
