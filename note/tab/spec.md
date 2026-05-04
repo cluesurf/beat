@@ -17,7 +17,7 @@ humanize: subtle
 x:
   velocity: 80
 x̣:
-  velocity: 60 # combining dot below — convention: "triplet"
+  velocity: 60 # combining dot below. Convention: "triplet"
 
 HH:
   instrument: hihat
@@ -37,8 +37,8 @@ T1|----:----:----:----:----|----:----:----:----:----|
 
 A tab document has **two parts**:
 
-1. **Front matter** — YAML at the top of the file
-2. **Tab blocks** — one or more, each prefixed by its own YAML
+1. **Front matter**. YAML at the top of the file
+2. **Tab blocks**. One or more, each prefixed by its own YAML
    mini-header
 
 A tab block ends where the next tab block's mini-header begins, or at
@@ -61,7 +61,7 @@ Optional YAML keys:
 
 ## Note characters
 
-A **note character** is a single grapheme cluster — one base char plus
+A **note character** is a single grapheme cluster. One base char plus
 zero or more combining diacritics. Each unique grapheme is its own slot.
 
 ```yaml
@@ -75,7 +75,7 @@ x̃: # x + combining tilde (̃)
   velocity: 95
 ```
 
-Diacritic meanings are **purely conventional** — the parser treats each
+Diacritic meanings are **purely conventional**. The parser treats each
 unique grapheme as a distinct note type. By project convention:
 
 | Diacritic    | Conventional meaning |
@@ -104,7 +104,7 @@ A note can be defined at three scopes (most-specific wins):
 
 ## Instrument lines
 
-Each tab row begins with an uppercase **line name** — `H`, `HH`, `S`,
+Each tab row begins with an uppercase **line name**. `H`, `HH`, `S`,
 `T1`, etc. The line name maps to an instrument + per-line config.
 
 For `instrument: drumkit`, [`drum.md`](./drum.md) lists every default
@@ -154,7 +154,7 @@ The mini-header lines come **immediately before** the tab rows. No blank
 line between them. The block ends when the next mini-header (a line
 matching `^[a-z]+:`) appears, or at EOF.
 
-### Measure spec — `M*N`
+### Measure spec. `M*N`
 
 - **N** = pulses per measure (matches the time-signature numerator)
 - **M** = grid sub-positions per pulse
@@ -188,7 +188,7 @@ matching `^[a-z]+:`) appears, or at EOF.
 
 Every measure across every row contains the same number of grapheme
 slots **and** the same number of `:` separators. The parser enforces
-this — a mismatch throws a parse error citing the offending row.
+this. A mismatch throws a parse error citing the offending row.
 
 Line-name padding matters. A single-char name like `S` must be padded
 with a leading space so its `|` lines up with `HH|` and `T1|`.
@@ -215,7 +215,7 @@ comments after `#` on YAML lines are also ignored.
 
 ## Multiple tab blocks
 
-A document may have many tab blocks. They concatenate in order — bar N+1
+A document may have many tab blocks. They concatenate in order. Bar N+1
 of block 2 directly follows the last bar of block 1.
 
 ```
@@ -230,7 +230,7 @@ S|----:x---:----:x---:----|
 K|x---:----:x---:--x-:x---|
 ```
 
-Note the colons inside each measure — they're **mandatory beat
+Note the colons inside each measure. They're **mandatory beat
 separators**, not cosmetic. The parser uses them to count beats.
 
 ## Output

@@ -56,14 +56,14 @@ Check, in order:
 
 1. IAC Driver "Device is online" is checked.
 2. The IAC port is named exactly **TS Drum Engine** (or contains those
-   words — the lookup uses `includes()`).
+   words. The lookup uses `includes()`).
 3. `pnpm list:ports` shows it under outputs.
 4. Logic track is selected AND record-enabled.
 5. Superior Drummer has a kit loaded with audible samples.
-6. Logic's audio output is working — test with the on-screen keyboard or
+6. Logic's audio output is working. Test with the on-screen keyboard or
    a built-in instrument.
 7. MIDI channel 10 (drum channel) isn't filtered in Logic.
-8. Try note 36 directly in Logic's piano roll — does it trigger SD3? If
+8. Try note 36 directly in Logic's piano roll. Does it trigger SD3? If
    not, the problem is downstream of MIDI.
 
 ## 6. What just happened
@@ -92,10 +92,10 @@ folders under [`../test/`](../test).
 | Symptom                                | Likely cause                                                               |
 | -------------------------------------- | -------------------------------------------------------------------------- |
 | `MIDI port not found` error            | IAC port not enabled / wrong name                                          |
-| `easymidi` install fails               | Native build needs Xcode CLT — `xcode-select --install`                    |
+| `easymidi` install fails               | Native build needs Xcode CLT. `xcode-select --install`                    |
 | Hear MIDI but no audio                 | Logic track not record-enabled, or SD3 has no kit                          |
 | Hits register but trigger wrong sample | Kit's note mapping ≠ GM (open SD3 mapping editor)                          |
-| Latency >50ms                          | Logic's audio buffer too high — Preferences → Audio → I/O Buffer 64 or 128 |
+| Latency >50ms                          | Logic's audio buffer too high. Preferences → Audio → I/O Buffer 64 or 128 |
 
 ## 8. File layout
 

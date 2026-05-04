@@ -66,6 +66,16 @@ beat ./calm.beat
 It loops forever, reloads on save, and plays through Logic. Hit Ctrl-C
 to stop.
 
+## Beyond drums
+
+Drumkit is the first instrument pack. The format is instrument-agnostic:
+the same `.beat` file format can drive **any MIDI instrument** via
+pluggable packs. On the roadmap: handpan, flute, cinematic orchestra
+(strings / brass / woodwinds / choir), and tribal / world instruments
+(taiko, frame drums, kalimba, gongs, ethnic flutes). See
+[`note/roadmap.md`](./note/roadmap.md#beyond-drums-any-midi-instrument)
+for the design.
+
 ## Programmatic API
 
 Same engine, called from your own TypeScript:
@@ -77,8 +87,7 @@ import { parse, play } from '@cluesurf/beat'
 const beat = parse(readFileSync('./calm.beat', 'utf8'))
 const stop = play(beat.song, { loop: true })
 
-// later:
-stop()
+stop() // whenever you want
 ```
 
 See [`code/index.ts`](./code/index.ts) for the full surface.
@@ -154,7 +163,7 @@ table, and dev loop.
 ## Tests
 
 ```bash
-pnpm exec vitest run             # 31 tests covering the tab parser
+pnpm test                        # 31 tests covering the tab parser
 ```
 
 ## Docs

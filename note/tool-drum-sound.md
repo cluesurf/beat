@@ -1,4 +1,4 @@
-# Tool drum sound — Superior Drummer 3 setup
+# Tool drum sound. Superior Drummer 3 setup
 
 How to configure SD3 once, in the GUI, so the kit you trigger from
 `code/console/play.ts` actually sounds like Danny Carey.
@@ -22,7 +22,7 @@ engine in `code/` plays it; SD3 makes the noise.
 ```
 SD3 → Library tab
   → SDX → "Progressive Foundry"
-    → load preset "Progressive Foundry — Default"
+    → load preset "Progressive Foundry. Default"
 ```
 
 This gives you Danny's pickled wood Sonor kit, his cymbals, his rooms.
@@ -34,7 +34,7 @@ Decadence, Death & Darkness) miss the dry, woody attack.
 
 ---
 
-## 2. Snare — add the raw layer
+## 2. Snare. Add the raw layer
 
 Goal: Carey's snare reads as **woody crack** plus **tight sizzle**, not
 just one or the other.
@@ -43,7 +43,7 @@ just one or the other.
 Drums tab → Snare slot
   → right-click → "Stack a drum"
     → from SDX: pick a "Raw" or "Dry" snare variant
-      (Progressive Foundry includes several "no room mic" snares —
+      (Progressive Foundry includes several "no room mic" snares.
        use "Snare Top - Raw" or "Tama Bell Brass - Dry")
   → blend at 50/50
 ```
@@ -63,11 +63,11 @@ Mapping window so ghosts read as wood not as wire.
 
 ---
 
-## 3. Toms — eight total, tuned
+## 3. Toms. Eight total, tuned
 
 Default Progressive Foundry has 4 toms. Tool wants more. Two ways:
 
-### Option A — stack within existing slots
+### Option A. Stack within existing slots
 
 ```
 Drums tab → tomHigh slot
@@ -79,7 +79,7 @@ Drums tab → tomHigh slot
 Stacking gets you two notes per tom slot but they fire on the same note
 number. Useful for thickness, not for separate notes.
 
-### Option B (preferred) — assign to unused note numbers
+### Option B (preferred). Assign to unused note numbers
 
 SD3's Mapping window lets you put any drum on any note. So you load
 extra toms from the SDX browser and pin them to:
@@ -123,14 +123,14 @@ over an A drone or in fourths/fifths):
 | gong drum  | E2 (-24 st) | sub-bass drum at the end of fills |
 
 Tune by ear against a piano. Carey's actual kit drifts; don't quantize
-to perfect equal temperament — leave 5–15 cents off so the toms breathe.
+to perfect equal temperament. Leave 5–15 cents off so the toms breathe.
 
 Save tuning as part of the preset: **File → Save Preset → "Tool
 (custom)"**.
 
 ---
 
-## 4. Cymbals — add china + secondary crashes + secondary ride
+## 4. Cymbals. Add china + secondary crashes + secondary ride
 
 Default Progressive Foundry: 2 crashes + ride + hat + splash. Tool needs
 more.
@@ -143,7 +143,7 @@ Cymbals tab
         - Sabian AAX Crash 19″ (right-side dark crash)
         - Paiste 2002 Crash 17″ (left-side bright)
         - Zildjian K Custom Ride 22″ (secondary ride for bell work)
-        - Sabian HHX Splash 10″ (already in PF — keep it)
+        - Sabian HHX Splash 10″ (already in PF. Keep it)
         - Bell-only ride sample (for the bell ostinatos)
 ```
 
@@ -164,12 +164,12 @@ Cymbals tab
 
 Make sure each cymbal has its choke articulation mapped. SD3 default:
 **velocity 1 on the same note = choke**. The TS engine can fire those
-directly. Useful for the bridge in `base/song/example` — choke the crash
+directly. Useful for the bridge in `base/song/example`. Choke the crash
 on beat 5 instead of letting it ring.
 
 ---
 
-## 5. Mixer — get out of the way
+## 5. Mixer. Get out of the way
 
 Dial in the room before adding any extra plugins.
 
@@ -200,7 +200,7 @@ File → Save Preset
 ```
 
 From now on, recall it manually before running `pnpm play`. The TS
-engine plays whatever kit is currently loaded — it doesn't care which.
+engine plays whatever kit is currently loaded. It doesn't care which.
 
 ---
 
@@ -232,7 +232,7 @@ that exercises the new pieces.
 End-to-end test:
 
 ```bash
-pnpm boot              # 4 hits — kick + snare confirms the chain
+pnpm boot              # 4 hits. Kick + snare confirms the chain
 pnpm play example      # 5/4 song should now use:
                        #   - tuned toms (descending chorus fill)
                        #   - china (chorus beat 1.5)

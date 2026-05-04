@@ -125,7 +125,7 @@ them in front matter if you want different meaning.
 | Glyph | Meaning | Default note-char config                          |
 | ----- | ------- | ------------------------------------------------- |
 | `x`   | regular | velocity: 95 (line default)                       |
-| `x̣`   | triplet | velocity: 60 — used as a flag, you control timing |
+| `x̣`   | triplet | velocity: 60. Used as a flag, you control timing |
 | `x́`   | accent  | velocity: 118                                     |
 | `x̃`   | roll    | hit: roll                                         |
 | `ẋ`   | ghost   | velocity: 30                                      |
@@ -150,7 +150,7 @@ S|----:x---:----:x---|
 H|x-x-:x-x-:x-x-:x-x-|
 ```
 
-Three lines, no overrides — uses every default. Plays a basic 4/4
+Three lines, no overrides. Uses every default. Plays a basic 4/4
 backbeat with hi-hat 8ths.
 
 Each measure has 4 beats separated by `:` (mandatory), and each beat has

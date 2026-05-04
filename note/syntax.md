@@ -40,7 +40,7 @@ text/
 | `x̣` / `x́` / `x̃` / `ẋ` (combining) | `constant.character.tab-note.combining.beat`                                |
 | Anything else inside a tab row    | `invalid.illegal.tab-note.beat`                                             |
 
-The "anything else" rule means typos in your tab content show up red —
+The "anything else" rule means typos in your tab content show up red.
 the same way the parser's "unknown note character" error would show up
 at runtime.
 
@@ -84,7 +84,7 @@ Extensions panel → ⋯ menu → Install from VSIX…
 
 ## Development loop
 
-Open `text/` in VS Code, press **F5** — opens an Extension Development
+Open `text/` in VS Code, press **F5**. Opens an Extension Development
 Host with the extension loaded. Make changes, press F5 again.
 
 ## Why the nested layout

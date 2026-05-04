@@ -16,14 +16,14 @@ All of this is "just MIDI" and works today through the IAC bus.
 | Pitch (any drum)          | MIDI Pitch Bend on the channel that drum lives on                 |
 | Velocity → tone           | SD3 maps velocity layers to articulation (rim, ghost, rimshot)    |
 | Articulation              | Per-piece note number (e.g. snare main 38 / rim 40 / sidestick 37 |
-| Hi-hat openness           | CC 4 (Foot Controller) or CC 1 — SD3 maps it to hat position      |
+| Hi-hat openness           | CC 4 (Foot Controller) or CC 1. SD3 maps it to hat position      |
 | Mixer level (per channel) | MIDI volume CC 7 on that channel                                  |
 | Mute / solo (mixer)       | Custom MIDI Learn → CC                                            |
 | Kit-piece variation       | "Articulation" CCs SD3 exposes via Mapping window                 |
 | Sustain / choke           | CC 64 sustain, or note-on at velocity 1 = choke for cymbals       |
 
 So: **per-hit pitch, per-hit volume, per-hit articulation, per-hit choke
-— all from `code/hit.ts`-style note-on plus CCs.**
+- all from `code/hit.ts`-style note-on plus CCs.**
 
 Add a CC sender in `code/hit.ts`:
 
@@ -112,7 +112,7 @@ multi-track routing        ───►   "kit slot A vs B"
 ```
 
 Mental model: **TypeScript is the drummer. SD3 is the drum kit. You
-don't programmatically change the kit between songs — you program the
+don't programmatically change the kit between songs. You program the
 drummer.**
 
 ## What to add to `code/hit.ts` next
@@ -153,7 +153,7 @@ hacking.
 | Different articulation per hit    | Yes (note number / CC)          |
 | Different hi-hat openness per hit | Yes (CC 4)                      |
 | Different per-drum mixer level    | Yes (CC 7)                      |
-| Different drum kit per song       | Yes — via separate Logic tracks |
+| Different drum kit per song       | Yes. Via separate Logic tracks |
 | Different sample for one drum     | No (GUI only)                   |
 | Different tuning on one drum      | No directly. Use pitch bend.    |
 | Add a new tom to the kit          | No (GUI only)                   |

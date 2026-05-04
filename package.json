@@ -18,6 +18,7 @@
     "check": "tsx code/console/index.ts list-ports",
     "play": "tsx code/console/index.ts play",
     "export": "tsx code/console/index.ts export",
+    "test": "pnpm exec vitest run",
     "text:make": "cd text && pnpm exec vsce package",
     "text:load": "cd text && pnpm exec vsce package && (code --uninstall-extension cluesurf.beat-text || true) && code --install-extension $(ls -t beat-text-*.vsix | head -1)",
     "text:host": "cd text && pnpm exec vsce publish",
