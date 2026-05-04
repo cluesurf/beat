@@ -62,8 +62,7 @@ K|x---:----:x---:----|
 ## Running
 
 Prerequisite: macOS IAC bus configured + Logic Pro listening. Full setup
-at
-[`note/music/making/midi-hello-world.md`](./note/music/making/midi-hello-world.md).
+at [`note/begin.md`](./note/begin.md).
 
 ```bash
 pnpm list:ports                              # verify "TS Drum Engine" port
