@@ -1,4 +1,4 @@
-# beat. Roadmap
+# Beat Roadmap
 
 What to build next, grouped by impact.
 
@@ -12,8 +12,8 @@ These give the biggest payoff per hour of work.
 1. **MIDI file export**. Turn `expandSong()` output into a `.mid` file.
    Drag into Logic for permanent capture. Share with collaborators.
    Audition a song without running TS.
-2. **Tab parser primitive**. Extract the Grudge file's `parseBar()`
-   into `code/tab.ts`. Every future song becomes 5× faster to encode.
+2. **Tab parser primitive**. Extract the Grudge file's `parseBar()` into
+   `code/tab.ts`. Every future song becomes 5× faster to encode.
 3. **Live transport keys**. Space to pause, `[` / `]` to jump bars, `L`
    to loop the current section. Pure workflow joy.
 
@@ -42,8 +42,7 @@ How songs get written.
   picks a different subset.
 - **Polyrhythm helpers**. `polyrhythm(3, 4, NOTE.tomMid)` returns a
   Pattern.
-- **Swing as a global feel parameter**. `feel: { swing: 0.66 }` on
-  Song.
+- **Swing as a global feel parameter**. `feel: { swing: 0.66 }` on Song.
 - **Pattern library**. `code/library/fills.ts`,
   `code/library/grooves.ts` with named, reusable phrases.
 - **Song templates**. `rock4onFloor()`, `jazzShuffle()` factories that
@@ -54,8 +53,8 @@ How songs get written.
   / triplet.
 - **Time-signature change support**. Explicit `timeSignature: '5/8'` on
   Pattern. Currently inferred from `beats`.
-- **Polymeter**. Different patterns at different lengths cycling
-  against each other.
+- **Polymeter**. Different patterns at different lengths cycling against
+  each other.
 - **Pickup / count-in**. `countIn: 4` on Song for a click before bar 1.
 - **Click track layered with song**. `--click` flag adds a metronome on
   a separate channel.
@@ -132,8 +131,8 @@ So it doesn't break.
 - **`expandSong` validation**. Warn on hits with
   `beat >= pattern.beats`, unknown pattern references, velocities out of
   `[1, 127]`.
-- **Vitest unit tests**. Tab parser roundtrip, `expandSong`
-  correctness, humanize determinism by seed.
+- **Vitest unit tests**. Tab parser roundtrip, `expandSong` correctness,
+  humanize determinism by seed.
 - **Integration test without MIDI hardware**. Mock `easymidi.Output`,
   assert hit sequence.
 - **Linting for songs**. `pnpm cli check <song>` runs validation +
@@ -147,8 +146,8 @@ Tools for inspecting your kit.
 
 - **`pnpm cli sweep`**. Play every NOTE entry alongside its name with
   longer pauses (already partly done by `test-all`).
-- **Velocity sweep**. Fire one NOTE at velocities 10, 30, 60, 90, 120
-  to hear layer transitions.
+- **Velocity sweep**. Fire one NOTE at velocities 10, 30, 60, 90, 120 to
+  hear layer transitions.
 - **Articulation sweep**. Fire all snare articulations (main, rim,
   sidestick, ghost) in sequence.
 - **Choke test**. Fire each cymbal then choke it on a 1-second delay.
@@ -163,37 +162,37 @@ Target families:
 
 - **Pitched percussion**: handpan / hang, marimba, vibraphone, kalimba,
   steel pan, gamelan, taiko, frame drums, tabla, djembe, congas. Each
-  one wants its own articulation set (slap / tone / bass / muted /
-  flam / roll) plus a pitch axis (notes laid out across the staff).
+  one wants its own articulation set (slap / tone / bass / muted / flam
+  / roll) plus a pitch axis (notes laid out across the staff).
 - **Wind**: flute, recorder, ney, shakuhachi, duduk, didgeridoo. Needs
   pitch + articulation (legato / staccato / breath-attack / overblow)
   plus optional vibrato as a CC stream.
-- **Cinematic orchestra**: strings (sustains, spiccato, pizz, trem,
-  col legno), brass (sustain, staccato, marcato, swell, fall),
-  woodwinds, choir (ah / oh / mm / consonant attacks), percussion
-  ensembles. Each section's articulations live on different MIDI key-
-  switches, which the line config maps to the tab's note characters.
+- **Cinematic orchestra**: strings (sustains, spiccato, pizz, trem, col
+  legno), brass (sustain, staccato, marcato, swell, fall), woodwinds,
+  choir (ah / oh / mm / consonant attacks), percussion ensembles. Each
+  section's articulations live on different MIDI key- switches, which
+  the line config maps to the tab's note characters.
 - **Tribal / world**: Tibetan singing bowls, gongs, didgeridoo, frame
-  drums, shakers, rainstick, bullroarer, vocal phonemes / chants,
-  ethnic flutes (kena, bansuri, dizi).
+  drums, shakers, rainstick, bullroarer, vocal phonemes / chants, ethnic
+  flutes (kena, bansuri, dizi).
 
 What needs to be built:
 
 - **`InstrumentPack`**. A reusable definition of articulations + line
   defaults, shipped under `code/tab/pack/<name>.ts`. `drumkit` is the
   first; add `handpan`, `flute`, `strings`, `taiko`, etc.
-- **Pitched-instrument syntax**. For melodic lines the tab needs a
-  pitch axis. Either (a) one row per chromatic note with `x` marks (like
-  a piano-roll grid), or (b) a single row with note-letter graphemes
-  (`G`, `A`, `B♭`, `C`) instead of `x`/`o`. Pick (b) for compactness:
-  the same colon-separated grid, but each cell encodes a pitch.
+- **Pitched-instrument syntax**. For melodic lines the tab needs a pitch
+  axis. Either (a) one row per chromatic note with `x` marks (like a
+  piano-roll grid), or (b) a single row with note-letter graphemes (`G`,
+  `A`, `B♭`, `C`) instead of `x`/`o`. Pick (b) for compactness: the same
+  colon-separated grid, but each cell encodes a pitch.
 - **Multi-instrument songs**. A single `.beat` file declares multiple
   `instrument:` blocks (drumkit + handpan + strings). Each tab block
   inherits the instrument from its `instrument:` field; default carries
   forward.
-- **General-MIDI program changes**. CC-bank + program-change events
-  per instrument so a single GM-compatible synth can render many parts
-  on different channels.
+- **General-MIDI program changes**. CC-bank + program-change events per
+  instrument so a single GM-compatible synth can render many parts on
+  different channels.
 - **VST keyswitch sequences**. For Spitfire / EastWest / NI libraries,
   emit the keyswitch note before the note range plays, encoding
   articulation per phrase.
@@ -201,12 +200,12 @@ What needs to be built:
   generate continuous CC1 / CC74 / pitch-bend automation alongside the
   hits, derived from a `vibrato:` or `expression:` field in the line
   config.
-- **Tuning systems**. Handpan, gamelan, etc. use non-12TET scales.
-  Add `tuning:` field on instrument packs that remaps note letters to
+- **Tuning systems**. Handpan, gamelan, etc. use non-12TET scales. Add
+  `tuning:` field on instrument packs that remaps note letters to
   cent-offset MIDI notes (or uses MTS-ESP-style tuning tables).
-- **Multi-channel routing**. Each instrument pack declares its
-  preferred MIDI channel; the engine sends each line to its own channel
-  so a DAW can host one instance per part.
+- **Multi-channel routing**. Each instrument pack declares its preferred
+  MIDI channel; the engine sends each line to its own channel so a DAW
+  can host one instance per part.
 
 Single-line example (handpan, draft):
 
@@ -232,8 +231,8 @@ Beyond one song at a time.
   B's intro starts.
 - **Album mode**. Play all songs in a directory back-to-back with
   configurable gaps.
-- **Live setlist navigator**. Keyboard advance to next song, mark a
-  song to repeat.
+- **Live setlist navigator**. Keyboard advance to next song, mark a song
+  to repeat.
 
 ## Advanced / experimental
 
@@ -243,10 +242,10 @@ Won't ship soon, worth keeping in mind.
   auto-pitch-bend to fit.
 - **Generative fills**. Given the surrounding pattern + a length,
   generate a stylistic fill.
-- **External controller support**. Foot pedal triggers a fill, MIDI
-  knob controls humanize amount live.
-- **Co-play with Logic**. Listen to Logic's MIDI output, sync TS
-  phrases against it.
+- **External controller support**. Foot pedal triggers a fill, MIDI knob
+  controls humanize amount live.
+- **Co-play with Logic**. Listen to Logic's MIDI output, sync TS phrases
+  against it.
 - **Distributed playback**. Multiple machines on the LAN run different
   drums (kick on box A, cymbals on box B).
 - **Python interop**. Pipe TS-generated MIDI into a Python ML model for
