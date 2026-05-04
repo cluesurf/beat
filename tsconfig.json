@@ -3,26 +3,30 @@
     "target": "ES2022",
     "module": "ESNext",
     "moduleResolution": "Bundler",
-    "allowJs": true,
+    "outDir": "host",
+    "rootDir": ".",
+    "declaration": true,
     "skipLibCheck": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "esModuleInterop": true,
     "isolatedModules": true,
     "resolveJsonModule": true,
-    "noEmit": true,
+    "baseUrl": ".",
     "paths": {
       "@/*": ["./*"]
     }
   },
-  "include": [
-    "**/*.ts",
-  ],
+  "include": ["code/**/*.ts"],
   "exclude": [
     "node_modules",
     "**/node_modules",
-    "**/host",
-    "**/dist",
-    "**/build"
+    "host",
+    "test",
+    "text",
+    "task",
+    "out",
+    "**/*.test.ts",
+    "**/*.spec.ts"
   ]
 }

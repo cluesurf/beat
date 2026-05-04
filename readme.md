@@ -20,6 +20,67 @@
 
 <img src="./text/view/part.png" width="512">
 
+Pro music tools sound real because real drummers don't play to grid:
+every hit moves a few milliseconds, every velocity drifts. **This repo
+is a plain-text drum-tab format that compiles to humanized MIDI** and
+streams it into Logic (or any DAW) over a virtual MIDI bus. You write
+five lines of `K`/`S`/`H`/`T1`/`T2`, save the file, and Superior Drummer
+plays it back through your kit: with timing jitter, velocity ranges,
+swing, flams and accents already baked in.
+
+## Quickstart
+
+First, follow [`note/begin.md`](./note/begin.md) once to enable the
+macOS IAC virtual MIDI port and load Superior Drummer 3 in Logic. Then:
+
+```bash
+npm install -g @cluesurf/beat
+```
+
+Save this as `calm.beat`:
+
+```beat
+instrument: drumkit
+tempo: 88
+humanize: subtle
+
+measure: 4*4
+C|X---:----:----:----|
+H|x-x-:x-x-:x-x-:x-x-|
+S|----:x---:----:x---|
+K|x---:--x-:--x-:----|
+```
+
+Run it:
+
+```bash
+beat ./calm.beat
+```
+
+It loops forever, reloads on save, and plays through Logic. Hit Ctrl-C
+to stop.
+
+## Programmatic API
+
+Same engine, called from your own TypeScript:
+
+```ts
+import { readFileSync } from 'node:fs'
+import { parse, play } from '@cluesurf/beat'
+
+const beat = parse(readFileSync('./calm.beat', 'utf8'))
+const handle = play(beat.song, { loop: true })
+
+// later:
+handle.stop()
+await handle.promise
+```
+
+`parse(text)` returns `{ song, hits, config, errors }` — the parsed
+Song plus any non-fatal parse warnings. `play(song, opts?)` returns
+`{ promise, stop }`. See [`code/index.ts`](./code/index.ts) for the
+full surface (`humanize`, `expandSong`, `exportSongToMidi`, `NOTE`, etc.).
+
 ## What's in here
 
 ```
