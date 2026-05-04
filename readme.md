@@ -81,10 +81,7 @@ const stop = play(beat.song, { loop: true })
 stop()
 ```
 
-`parse(text)` returns `{ song, hits, config, errors }` — the parsed Song
-plus any non-fatal parse warnings. `play(song, opts?)` returns `stop`.
-See [`code/index.ts`](./code/index.ts) for the full surface (`humanize`,
-`expandSong`, `exportSongToMidi`, `NOTE`, etc.).
+See [`code/index.ts`](./code/index.ts) for the full surface.
 
 ## What's in here
 
