@@ -8,7 +8,7 @@
 
 <h3 align='center'>@cluesurf/beat</h3>
 <p align='center'>
-  A Codebase Producer
+  A Codebase Producer ∩
 </p>
 
 <br/>
