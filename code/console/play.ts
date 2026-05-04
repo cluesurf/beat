@@ -5,7 +5,7 @@
 //   pnpm cli play example --restart          # cut current loop on save
 //   pnpm cli play example --pattern verse    # solo one pattern, looped
 
-import { dirname, resolve } from 'node:path'
+import { dirname, relative, resolve } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { watch } from 'node:fs'
 import easymidi from 'easymidi'
@@ -16,12 +16,15 @@ import { openDrumOutput } from '@/code/output'
 import { sendHit } from '@/code/hit'
 import { expandSong, type Hit, type Song } from '@/code/song'
 import { DRUM_CHANNEL } from '@/code/note'
+import { humanize, HUMANIZE, type HumanizePreset } from '@/code/humanize'
 
 type Args = {
   song: string
   once: boolean
   restart: boolean
   pattern?: string
+  humanize?: string
+  seed?: number
 }
 
 const __filename = fileURLToPath(import.meta.url)
@@ -50,6 +53,15 @@ export const playCommand: CommandModule<unknown, Args> = {
       .option('pattern', {
         type: 'string',
         describe: 'Solo a single pattern (looped forever)',
+      })
+      .option('humanize', {
+        type: 'string',
+        choices: Object.keys(HUMANIZE),
+        describe: 'Apply timing+velocity jitter (overrides song setting)',
+      })
+      .option('seed', {
+        type: 'number',
+        describe: 'Reproducible humanization seed',
       }) as Argv<Args>,
   handler: async args => {
     await runPlay(args)
@@ -118,7 +130,18 @@ async function runPlay(args: Args): Promise<void> {
   }
 
   function schedulePass(song: Song): Promise<void> {
-    const hits = expandSong(song)
+    const raw = expandSong(song)
+    // CLI flag wins; otherwise fall back to whatever the song
+    // declared. `humanize: 'off'` from the CLI explicitly
+    // disables a song's setting.
+    const humanizeConfig =
+      args.humanize !== undefined
+        ? HUMANIZE[args.humanize as HumanizePreset]
+        : song.humanize
+    const hits = humanizeConfig
+      ? humanize(raw, { ...humanizeConfig, seed: args.seed ?? humanizeConfig.seed })
+      : raw
+
     const msPerBeat = 60_000 / song.bpm
     const lastBeat = Math.max(0, ...hits.map(h => h.beat))
     const totalMs = lastBeat * msPerBeat + 500
@@ -126,15 +149,18 @@ async function runPlay(args: Args): Promise<void> {
     const tag = args.pattern
       ? `${song.name} [solo: ${args.pattern}]`
       : song.name
+    const humanizeTag = args.humanize ?? (song.humanize ? 'song-default' : 'off')
     console.log(
       `[beat] playing "${tag}" @ ${song.bpm} BPM — ` +
-        `${hits.length} hits over ${(totalMs / 1000).toFixed(1)}s`,
+        `${hits.length} hits over ${(totalMs / 1000).toFixed(1)}s ` +
+        `[humanize: ${humanizeTag}]`,
     )
 
     for (const hit of hits) {
-      timers.push(
-        setTimeout(() => patchedSendHit(hit), hit.beat * msPerBeat),
-      )
+      // Humanization can produce slightly negative beats — clamp
+      // to 0 so setTimeout doesn't get a negative delay.
+      const delay = Math.max(0, hit.beat * msPerBeat)
+      timers.push(setTimeout(() => patchedSendHit(hit), delay))
     }
 
     return new Promise(done => {
@@ -154,8 +180,9 @@ async function runPlay(args: Args): Promise<void> {
     watch(songDir, { recursive: true }, (_event, filename) => {
       onChange(filename ? String(filename) : null)
     })
+    const songDirShort = relative(process.cwd(), songDir) || songDir
     console.log(
-      `[beat] watching ${songDir} ` +
+      `[beat] watching ${songDirShort} ` +
         `(${
           args.restart ? 'cut + restart' : 'finish loop, then reload'
         })`,

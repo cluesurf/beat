@@ -19,6 +19,7 @@
 //   Carey trick — without the pattern data getting noisy.
 
 import { DRUM_CHANNEL } from './note'
+import type { HumanizeConfig } from './humanize'
 
 export type Hit = {
   // Where in the pattern, in beats. Sub-beats fine: 0.5 = the
@@ -54,6 +55,9 @@ export type Song = {
   patterns: Pattern[]
   // Order to play patterns in.
   arrangement: Section[]
+  // Optional humanization applied to every hit at play time.
+  // The CLI's --humanize flag overrides this. See code/humanize.
+  humanize?: HumanizeConfig
 }
 
 // Helper: resolve `arrangement` into a flat hit list with
