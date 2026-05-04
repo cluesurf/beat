@@ -91,10 +91,6 @@ beat/
 ├── test/             # songs (each in text.beat / code.ts / data.ts forms)
 ├── text/             # the .beat VS Code syntax-highlighter extension
 ├── note/             # docs (spec, drum defaults, roadmap, syntax, etc.)
-├── package.json
-├── pnpm-workspace.yaml
-├── tsconfig.json
-└── vitest.config.ts
 ```
 
 ## Examples
