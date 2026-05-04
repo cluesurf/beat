@@ -39,11 +39,11 @@ beat/
 Test songs live at `test/<name>/` and may exist in three equivalent
 representations:
 
-| File        | What it is                                                                                                |
-| ----------- | --------------------------------------------------------------------------------------------------------- |
-| `text.beat` | Text drum tab — see [`note/tab/spec.md`](./note/tab/spec.md) and [`note/tab/drum.md`](./note/tab/drum.md) |
-| `code.ts`   | Imperative TypeScript DSL (NOTE constants)                                                                |
-| `data.ts`   | Pure data (raw MIDI note numbers)                                                                         |
+| File        | What it is                                                                                               |
+| ----------- | -------------------------------------------------------------------------------------------------------- |
+| `text.beat` | Text drum tab: see [`note/tab/spec.md`](./note/tab/spec.md) and [`note/tab/drum.md`](./note/tab/drum.md) |
+| `code.ts`   | Imperative TypeScript DSL (NOTE constants)                                                               |
+| `data.ts`   | Pure data (raw MIDI note numbers)                                                                        |
 
 `pnpm play <name>` picks the first format it finds (`text.beat` first by
 default). Override with `--format beat | code | data | text`.
@@ -98,14 +98,14 @@ pnpm exec vitest run             # 31 tests covering the tab parser
 
 ## Docs
 
-- [`note/tab/spec.md`](./note/tab/spec.md) — generic tab format spec
-- [`note/tab/drum.md`](./note/tab/drum.md) — drumkit defaults
+- [`note/tab/spec.md`](./note/tab/spec.md): generic tab format spec
+- [`note/tab/drum.md`](./note/tab/drum.md): drumkit defaults
 - [`note/superior-drummer-control.md`](./note/superior-drummer-control.md)
-  — what SD3 lets us program
-- [`note/tool-drum-sound.md`](./note/tool-drum-sound.md) — Tool-style
-  SD3 setup
-- [`note/syntax.md`](./note/syntax.md) — `.beat` syntax highlighter
-- [`note/roadmap.md`](./note/roadmap.md) — what's next
+  : what SD3 lets us program
+- [`note/tool-drum-sound.md`](./note/tool-drum-sound.md): Tool-style SD3
+  setup
+- [`note/syntax.md`](./note/syntax.md): `.beat` syntax highlighter
+- [`note/roadmap.md`](./note/roadmap.md): what's next
 
 ## License
 
