@@ -29,6 +29,8 @@ S|----:x---:----:x---|
 K|x---:----:x---:----|
 ```
 
+![intro drum part to Tool - The Grudge](./view/part.png)
+
 The grammar colorizes:
 
 - **Comments** — `# ...` (line comments)

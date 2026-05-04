@@ -16,6 +16,10 @@
 <br/>
 <br/>
 
+## Introduction
+
+![intro drum part to Tool - The Grudge](./view/part.png)
+
 ## What's in here
 
 ```
@@ -30,16 +34,16 @@ beat/
 └── vitest.config.ts
 ```
 
-## Songs
+## Examples
 
-A song lives at `test/<name>/` and may exist in three equivalent
+Test songs live at `test/<name>/` and may exist in three equivalent
 representations:
 
-| File         | What it is                                  |
-| ------------ | ------------------------------------------- |
-| `text.beat`  | ASCII drum tab — see [`note/tab/spec.md`](./note/tab/spec.md) and [`note/tab/drum.md`](./note/tab/drum.md) |
-| `code.ts`    | Imperative TypeScript DSL (NOTE constants)  |
-| `data.ts`    | Pure data (raw MIDI note numbers)           |
+| File        | What it is                                                                                                 |
+| ----------- | ---------------------------------------------------------------------------------------------------------- |
+| `text.beat` | ASCII drum tab — see [`note/tab/spec.md`](./note/tab/spec.md) and [`note/tab/drum.md`](./note/tab/drum.md) |
+| `code.ts`   | Imperative TypeScript DSL (NOTE constants)                                                                 |
+| `data.ts`   | Pure data (raw MIDI note numbers)                                                                          |
 
 `pnpm play <name>` picks the first format it finds (`text.beat` first by
 default). Override with `--format beat | code | data | text`.
@@ -58,13 +62,15 @@ K|x---:----:x---:----|
 ## Running
 
 Prerequisite: macOS IAC bus configured + Logic Pro listening. Full setup
-at [`note/music/making/midi-hello-world.md`](./note/music/making/midi-hello-world.md).
+at
+[`note/music/making/midi-hello-world.md`](./note/music/making/midi-hello-world.md).
 
 ```bash
 pnpm list:ports                              # verify "TS Drum Engine" port
 pnpm try                                     # quick sanity hit
 pnpm play                                    # default song
 pnpm play tool/grudge                        # play a specific song
+pnpm play tool/grudge --part bridge-2        # specific part
 pnpm play tool/grudge --pattern bar-007      # solo one bar
 pnpm play tool/grudge --from 17 --to 32      # play a region
 pnpm play tool/grudge --humanize loose       # drag + jitter
@@ -95,8 +101,10 @@ pnpm exec vitest run             # 31 tests covering the tab parser
 
 - [`note/tab/spec.md`](./note/tab/spec.md) — generic tab format spec
 - [`note/tab/drum.md`](./note/tab/drum.md) — drumkit defaults
-- [`note/superior-drummer-control.md`](./note/superior-drummer-control.md) — what SD3 lets us program
-- [`note/tool-drum-sound.md`](./note/tool-drum-sound.md) — Tool-style SD3 setup
+- [`note/superior-drummer-control.md`](./note/superior-drummer-control.md)
+  — what SD3 lets us program
+- [`note/tool-drum-sound.md`](./note/tool-drum-sound.md) — Tool-style
+  SD3 setup
 - [`note/syntax.md`](./note/syntax.md) — `.beat` syntax highlighter
 - [`note/roadmap.md`](./note/roadmap.md) — what's next
 
