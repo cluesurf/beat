@@ -24,9 +24,9 @@ Pro music tools sound real because real drummers don't play to grid:
 every hit moves a few milliseconds, every velocity drifts. **This repo
 is a plain-text drum-tab format that compiles to humanized MIDI** and
 streams it into Logic (or any DAW) over a virtual MIDI bus. You write
-five lines of `K`/`S`/`H`/`T1`/`T2`, save the file, and Superior Drummer
-plays it back through your kit: with timing jitter, velocity ranges,
-swing, flams and accents already baked in.
+some [simple tabs](./note/tab/drum.md), save the `something.beat` file,
+and Superior Drummer plays it back through your kit: with timing jitter,
+velocity ranges, swing, flams and accents already baked in.
 
 ## Quickstart
 
@@ -76,10 +76,10 @@ handle.stop()
 await handle.promise
 ```
 
-`parse(text)` returns `{ song, hits, config, errors }` — the parsed
-Song plus any non-fatal parse warnings. `play(song, opts?)` returns
-`{ promise, stop }`. See [`code/index.ts`](./code/index.ts) for the
-full surface (`humanize`, `expandSong`, `exportSongToMidi`, `NOTE`, etc.).
+`parse(text)` returns `{ song, hits, config, errors }` — the parsed Song
+plus any non-fatal parse warnings. `play(song, opts?)` returns
+`{ promise, stop }`. See [`code/index.ts`](./code/index.ts) for the full
+surface (`humanize`, `expandSong`, `exportSongToMidi`, `NOTE`, etc.).
 
 ## What's in here
 
