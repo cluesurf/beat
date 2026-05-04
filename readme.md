@@ -139,7 +139,9 @@ pnpm export tool/grudge                      # write a .mid file
 
 ## Syntax highlighter
 
-The VS Code extension lives in [`text/`](./text). Top-level scripts:
+The
+[VS Code extension](https://marketplace.visualstudio.com/items?itemName=cluesurf.beat-text)
+lives in [`text/`](./text). Top-level scripts:
 
 ```bash
 pnpm text:make    # build the .vsix
