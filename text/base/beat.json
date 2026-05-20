@@ -17,7 +17,7 @@
       "patterns": [
         {
           "name": "comment.line.number-sign.beat",
-          "match": "(^|\\s)#.*$"
+          "match": "#.*$"
         }
       ]
     },
@@ -30,8 +30,9 @@
             "1": { "name": "variable.parameter.key.beat" },
             "2": { "name": "punctuation.separator.key-value.beat" }
           },
-          "end": "(?=#)|$",
+          "end": "$",
           "patterns": [
+            { "include": "#comments" },
             { "include": "#numbers" },
             { "include": "#strings" },
             { "include": "#unquoted-value" }
@@ -48,8 +49,9 @@
             "1": { "name": "variable.parameter.key.beat" },
             "2": { "name": "punctuation.separator.key-value.beat" }
           },
-          "end": "(?=#)|$",
+          "end": "$",
           "patterns": [
+            { "include": "#comments" },
             { "include": "#numbers" },
             { "include": "#strings" },
             { "include": "#unquoted-value" }
@@ -135,7 +137,7 @@
         },
         {
           "name": "constant.numeric.beat",
-          "match": "(?<![A-Za-z0-9_-])\\d+(\\.\\d+)?(?![A-Za-z_-])"
+          "match": "(?<![A-Za-z0-9_])-?\\d+(\\.\\d+)?(?![A-Za-z_-])"
         }
       ]
     },

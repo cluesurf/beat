@@ -1,6 +1,10 @@
 instrument: drumkit
 tempo: 104
-humanize: true
+humanize:
+  timing: 0.015               # beat units (±0.015 of a beat)
+  velocity: 6                 # MIDI units (±6)
+  timingBias: -0.1            # -1 = always drag, +1 = rush
+  seed: 42                    # reproducibility
 
 # 8 bars of 7/8 = 56 beats. Every default drumkit line (C, C2, X,
 # L, R, H, T1-T5, S, K, Hp) is declared in every measure so you

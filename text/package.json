@@ -3,7 +3,7 @@
   "icon": "view/beat.png",
   "displayName": "BeatText",
   "description": "BeatText Syntax Highlighter for .beat tab files",
-  "version": "1.0.2",
+  "version": "1.0.4",
   "license": "MIT",
   "publisher": "cluesurf",
   "scripts": {
@@ -47,18 +47,54 @@
       },
       "editor.tokenColorCustomizations": {
         "textMateRules": [
-          { "scope": "comment.line.silence.beat", "settings": { "fontStyle": "" } },
-          { "scope": "comment.line.number-sign.beat", "settings": { "fontStyle": "" } },
-          { "scope": "variable.parameter.key.beat", "settings": { "fontStyle": "", "foreground": "#F1FA8C" } },
-          { "scope": "keyword.control.line-name.beat", "settings": { "fontStyle": "" } },
-          { "scope": "constant.language.bar.beat", "settings": { "fontStyle": "" } },
-          { "scope": "constant.language.beat-separator.beat", "settings": { "fontStyle": "" } },
-          { "scope": "constant.numeric.beat", "settings": { "fontStyle": "", "foreground": "#8BE9FD" } },
-          { "scope": "support.type.ratio.beat", "settings": { "fontStyle": "", "foreground": "#8BE9FD" } },
-          { "scope": "support.type.value.beat", "settings": { "fontStyle": "", "foreground": "#8BE9FD" } },
-          { "scope": "entity.name.function.tab-note.beat", "settings": { "fontStyle": "" } },
-          { "scope": "entity.name.function.tab-note.accent.beat", "settings": { "fontStyle": "" } },
-          { "scope": "entity.name.function.tab-note.combining.beat", "settings": { "fontStyle": "" } }
+          {
+            "scope": "comment.line.silence.beat",
+            "settings": { "fontStyle": "" }
+          },
+          {
+            "scope": "comment.line.number-sign.beat",
+            "settings": { "fontStyle": "" }
+          },
+          {
+            "scope": "variable.parameter.key.beat",
+            "settings": { "fontStyle": "", "foreground": "#F1FA8C" }
+          },
+          {
+            "scope": "keyword.control.line-name.beat",
+            "settings": { "fontStyle": "" }
+          },
+          {
+            "scope": "constant.language.bar.beat",
+            "settings": { "fontStyle": "" }
+          },
+          {
+            "scope": "constant.language.beat-separator.beat",
+            "settings": { "fontStyle": "" }
+          },
+          {
+            "scope": "constant.numeric.beat",
+            "settings": { "fontStyle": "", "foreground": "#8BE9FD" }
+          },
+          {
+            "scope": "support.type.ratio.beat",
+            "settings": { "fontStyle": "", "foreground": "#8BE9FD" }
+          },
+          {
+            "scope": "support.type.value.beat",
+            "settings": { "fontStyle": "", "foreground": "#8BE9FD" }
+          },
+          {
+            "scope": "entity.name.function.tab-note.beat",
+            "settings": { "fontStyle": "" }
+          },
+          {
+            "scope": "entity.name.function.tab-note.accent.beat",
+            "settings": { "fontStyle": "" }
+          },
+          {
+            "scope": "entity.name.function.tab-note.combining.beat",
+            "settings": { "fontStyle": "" }
+          }
         ]
       }
     },
