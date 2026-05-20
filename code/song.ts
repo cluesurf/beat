@@ -29,6 +29,14 @@ export type Hit = {
   velocity?: number   // 1-127, default 110
   durationMs?: number // default 120 — drums don't really care
   channel?: number    // default DRUM_CHANNEL (10 in human terms)
+  // Set by the tab parser when this hit came from a dotted-below
+  // glyph (e.g. `x̣`). Tells the post-parse re-timer to fold the
+  // hit into a triplet group with its column neighbours. Stripped
+  // before playback — only used internally by the parser.
+  triplet?: boolean
+  // Original slot position within the measure (0-indexed). Used
+  // by the triplet re-timer; stripped before playback.
+  slot?: number
 }
 
 export type Pattern = {

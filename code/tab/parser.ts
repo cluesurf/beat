@@ -141,6 +141,10 @@ export function parse(text: string): ParseResult {
       }
     }
 
+    const slotsPerBeat = block.rate
+      ? block.rate.slots / block.rate.beats
+      : block.measure.subdivisions
+
     for (let m = 0; m < measureCount; m++) {
       barIndex++
       localBarIndex++
@@ -153,7 +157,13 @@ export function parse(text: string): ParseResult {
         }
       }
       measureHits.sort((a, b) => a.beat - b.beat)
-      allHits.push(...measureHits)
+      const retimed = retimeTriplets(
+        measureHits,
+        slotsPerBeat,
+        beatCursor,
+      )
+      retimed.sort((a, b) => a.beat - b.beat)
+      allHits.push(...retimed)
 
       const patternName = currentPart
         ? `${currentPart}-${localBarIndex}`
@@ -161,7 +171,7 @@ export function parse(text: string): ParseResult {
       patterns.push({
         name: patternName,
         beats: beatsPerMeasure,
-        hits: measureHits.map(h => ({
+        hits: retimed.map(h => ({
           ...h,
           beat: h.beat - beatCursor,
         })),
@@ -535,6 +545,58 @@ function inferFlowFromRows(
   return null
 }
 
+// Post-parse triplet re-timer. Scan a measure's hits column by
+// column (across all rows). Any contiguous run of slot positions
+// that has at least one dotted hit (`x̣`) is a triplet group; the
+// dotted hits within that group are re-timed so the group's
+// duration shrinks to 2/3 of its straight-time span (the standard
+// "3 in the time of 2" triplet). Non-dotted hits in the same
+// columns play at their straight slot positions.
+//
+// Strips the internal `slot` and `triplet` metadata from every
+// returned hit so they don't leak past the parser.
+function retimeTriplets(
+  hits: Hit[],
+  slotsPerBeat: number,
+  measureStartBeat: number,
+): Hit[] {
+  const tripletSlots = new Set<number>()
+  for (const hit of hits) {
+    if (hit.triplet && hit.slot !== undefined) {
+      tripletSlots.add(hit.slot)
+    }
+  }
+  if (tripletSlots.size === 0) return hits.map(stripParseMeta)
+
+  const sorted = [...tripletSlots].sort((a, b) => a - b)
+  const groups: Array<{ start: number; end: number }> = []
+  let gs = sorted[0]!
+  let ge = sorted[0]!
+  for (let i = 1; i < sorted.length; i++) {
+    const s = sorted[i]!
+    if (s === ge + 1) {
+      ge = s
+    } else {
+      groups.push({ start: gs, end: ge })
+      gs = s
+      ge = s
+    }
+  }
+  groups.push({ start: gs, end: ge })
+
+  // No compression: 3 evenly-spaced x̣s in a group already give
+  // the user's expected "1/2 the beat", "1 beat", etc. since the
+  // slot positions themselves encode the spacing. The triplet
+  // metadata stays as a flag (kept for future velocity/visual
+  // treatment) but timing matches the slot grid.
+  return hits.map(stripParseMeta)
+}
+
+function stripParseMeta(hit: Hit): Hit {
+  const { slot: _slot, triplet: _triplet, ...rest } = hit
+  return rest
+}
+
 function computeBeatsPerMeasure(block: BlockHeader): number {
   // Preferred: derive from rate. slotsPerMeasure / slotsPerBeat.
   if (block.rate) {
@@ -663,8 +725,14 @@ function parseMeasure(
     for (let p = 0; p < slots.length; p++) {
       const slot = slots[p]
       if (slot === '-' || slot === ' ') continue
+      // Combining dot-below (U+0323) marks a triplet candidate.
+      // Strip it for the note lookup so `x̣` resolves the same as
+      // `x` — the triplet semantics live in the re-timer, not the
+      // glyph table.
+      const isTriplet = slot.includes('̣')
+      const lookup = isTriplet ? slot.replace(/̣/g, '') : slot
       const spec = resolveNoteSpec(
-        slot,
+        lookup,
         lineDef,
         instrumentDef,
         globalNotes,
@@ -688,6 +756,7 @@ function parseMeasure(
         continue
       }
       const beatPos = b + p / slots.length
+      const slotIdx = b * slots.length + p
       const note = resolveNote(spec, instrumentDef, errors, lineName)
       if (note === null) continue
       const velocity = resolveVelocity(spec, lineDef, instrumentDef)
@@ -696,6 +765,8 @@ function parseMeasure(
         note,
         velocity,
         channel: DRUM_CHANNEL,
+        ...(isTriplet ? { triplet: true } : {}),
+        slot: slotIdx,
       })
       if (spec.flam !== undefined) {
         out.push({

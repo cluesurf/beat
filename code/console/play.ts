@@ -103,10 +103,8 @@ export const playCommand: CommandModule<unknown, Args> = {
       .option('loop', {
         type: 'string',
         describe:
-          'Loop a single bar (e.g. --loop 3) or a range (e.g. ' +
-          '--loop 1..9 for an 8-bar loop, DAW brace style with ' +
-          'exclusive end position). Use to match the script\'s ' +
-          'loop length to a DAW\'s loop region.',
+          'Loop a single bar (e.g. --loop 3) or a range, inclusive ' +
+          'both ends (e.g. --loop 1..2 for bars 1 and 2).',
       })
       .option('part', {
         type: 'string',
@@ -157,29 +155,29 @@ export const playCommand: CommandModule<unknown, Args> = {
 function applyLoopFlag(args: Args): void {
   if (!args.loop) return
 
-  // Range form: `--loop N..M` uses DAW loop-brace semantics —
-  // positions, exclusive end. `--loop 1..9` plays bars 1..8.
+  // Range form: `--loop N..M` is inclusive both ends.
+  // `--loop 1..2` plays bars 1 and 2 (2 bars).
   let from: number
   let to: number
   const range = args.loop.match(/^(\d+)\.\.(\d+)$/)
   if (range) {
     const start = Number.parseInt(range[1]!, 10)
     const end = Number.parseInt(range[2]!, 10)
-    if (end <= start) {
+    if (end < start) {
       throw new Error(
-        `--loop end (${end}) must be greater than start (${start})`,
+        `--loop end (${end}) must be >= start (${start})`,
       )
     }
     from = start
-    to = end - 1
+    to = end
   } else {
     // Single-bar form: `--loop N` loops just measure N.
     const single = args.loop.match(/^(\d+)$/)
     if (!single) {
       throw new Error(
         `--loop must be a bar number or x..y range ` +
-          `(e.g. --loop 3 for measure 3, or --loop 1..9 for an ` +
-          `8-bar loop). Got: "${args.loop}"`,
+          `(e.g. --loop 3 for measure 3, or --loop 1..2 for ` +
+          `bars 1 and 2). Got: "${args.loop}"`,
       )
     }
     const n = Number.parseInt(single[1]!, 10)
