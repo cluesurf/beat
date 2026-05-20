@@ -111,10 +111,36 @@ export function parse(text: string): ParseResult {
     const positionsPerMeasure =
       block.measure.subdivisions * block.measure.pulses
 
-    const parsedRows = rowLines
-      .map(line =>
+    // Pair each velocity row (no line name, just whitespace before
+    // `|`) with the preceding main row. Velocity rows without a
+    // host emit a warning and are dropped.
+    type RowGroup = { main: string; velocity?: string }
+    const grouped: RowGroup[] = []
+    for (const line of rowLines) {
+      const isVelocity =
+        VELOCITY_ROW.test(line) && !TAB_ROW.test(line)
+      if (isVelocity) {
+        if (grouped.length === 0) {
+          errors.push({
+            severity: 'warning',
+            message:
+              `Velocity row "${line.trim()}" has no preceding tab ` +
+              `row to attach to. Skipping.`,
+            location: { block: blockIdx + 1 },
+          })
+          continue
+        }
+        grouped[grouped.length - 1]!.velocity = line
+      } else {
+        grouped.push({ main: line })
+      }
+    }
+
+    const parsedRows = grouped
+      .map(g =>
         parseRow(
-          line,
+          g.main,
+          g.velocity,
           config,
           positionsPerMeasure,
           errors,
@@ -200,6 +226,51 @@ export function parse(text: string): ParseResult {
 // `measure:` (legacy) signals that a tab block follows.
 const MEASURE_KEY = /^(flow|measure)\s*:/
 const TAB_ROW = /^\s*[A-Z][A-Za-z0-9-]*\s*\|/
+// Velocity row: same shape as a tab row but with no line name —
+// just whitespace before the leading `|`. Each digit 0-9 in a
+// slot overrides the velocity of the corresponding hit in the
+// preceding named row.
+const VELOCITY_ROW = /^\s+\|/
+
+// Velocity-row glyphs. Digits 0-9 each map to a 13-unit MIDI
+// velocity bucket — `mid` is the midpoint (rounded up) used as
+// the default value; `min`/`max` clamp humanize jitter so
+// dynamics never cross a bucket boundary.
+//
+// Letter aliases overlay sheet-music dynamics on top of those
+// buckets — each picks a specific velocity within the bucket
+// it falls into:
+//   p / s = 15 (piano / soft)        — bucket 1
+//   P / S = 35 (piano strong)        — bucket 2
+//   m     = 55 (mezzo)               — bucket 4
+//   M     = 75 (mezzo-forte)         — bucket 6
+//   f / h = 100 (forte / hard)       — bucket 8
+//   F / H = 120 (fortissimo / hard)  — bucket 9
+const VELOCITY_BUCKETS: Record<
+  string,
+  { mid: number; min: number; max: number }
+> = {
+  '0': { mid: 7, min: 1, max: 12 },
+  '1': { mid: 19, min: 13, max: 24 },
+  '2': { mid: 31, min: 25, max: 36 },
+  '3': { mid: 43, min: 37, max: 48 },
+  '4': { mid: 55, min: 49, max: 60 },
+  '5': { mid: 67, min: 61, max: 72 },
+  '6': { mid: 79, min: 73, max: 84 },
+  '7': { mid: 91, min: 85, max: 96 },
+  '8': { mid: 103, min: 97, max: 108 },
+  '9': { mid: 118, min: 109, max: 127 },
+  p: { mid: 15, min: 13, max: 24 },
+  s: { mid: 15, min: 13, max: 24 },
+  P: { mid: 35, min: 25, max: 36 },
+  S: { mid: 35, min: 25, max: 36 },
+  m: { mid: 55, min: 49, max: 60 },
+  M: { mid: 75, min: 73, max: 84 },
+  f: { mid: 100, min: 97, max: 108 },
+  h: { mid: 100, min: 97, max: 108 },
+  F: { mid: 120, min: 109, max: 127 },
+  H: { mid: 120, min: 109, max: 127 },
+}
 // Lines with these keys, when they appear immediately before a
 // `flow:` / `measure:` line (no blank line in between), get pulled
 // into the new block. Lets authors write:
@@ -262,7 +333,7 @@ function splitBlock(
   let inRows = false
 
   for (const line of lines) {
-    if (TAB_ROW.test(line)) {
+    if (TAB_ROW.test(line) || VELOCITY_ROW.test(line)) {
       inRows = true
       rowLines.push(line)
       continue
@@ -593,6 +664,8 @@ function retimeTriplets(
 }
 
 function stripParseMeta(hit: Hit): Hit {
+  // Keep velocityMin/velocityMax — humanize needs them at play
+  // time. Drop the parse-only fields (slot, triplet).
   const { slot: _slot, triplet: _triplet, ...rest } = hit
   return rest
 }
@@ -622,6 +695,7 @@ type RowParse = {
 
 function parseRow(
   rowText: string,
+  velocityText: string | undefined,
   config: DocumentConfig,
   positionsPerMeasure: number,
   errors: ParseError[],
@@ -656,10 +730,19 @@ function parseRow(
     .split('|')
     .filter(s => s.length > 0)
 
+  const velocityMeasureTexts =
+    velocityText !== undefined
+      ? velocityText
+          .slice(velocityText.indexOf('|') + 1)
+          .split('|')
+          .filter(s => s.length > 0)
+      : []
+
   const measures: Hit[][] = []
   for (let m = 0; m < measureTexts.length; m++) {
     const hits = parseMeasure(
       measureTexts[m],
+      velocityMeasureTexts[m],
       lineName,
       m + 1,
       blockNumber,
@@ -677,6 +760,7 @@ function parseRow(
 
 function parseMeasure(
   measureText: string,
+  velocityText: string | undefined,
   lineName: string,
   measureNumber: number,
   blockNumber: number,
@@ -687,6 +771,8 @@ function parseMeasure(
   errors: ParseError[],
 ): Hit[] {
   const beats = measureText.split(':')
+  const velocityBeats =
+    velocityText !== undefined ? velocityText.split(':') : []
   const expectedPositionsPerBeat = positionsPerMeasure / beats.length
   if (!Number.isInteger(expectedPositionsPerBeat)) {
     errors.push({
@@ -707,6 +793,8 @@ function parseMeasure(
   for (let b = 0; b < beats.length; b++) {
     const beatText = beats[b]
     const slots = graphemes(beatText)
+    const velocitySlots =
+      velocityBeats[b] !== undefined ? graphemes(velocityBeats[b]) : []
     if (slots.length !== expectedPositionsPerBeat) {
       errors.push({
         severity: 'error',
@@ -723,7 +811,18 @@ function parseMeasure(
       continue
     }
     for (let p = 0; p < slots.length; p++) {
-      const slot = slots[p]
+      let slot = slots[p]
+      const velocityGlyph = velocitySlots[p]
+      const velocityBucket =
+        velocityGlyph && VELOCITY_BUCKETS[velocityGlyph]
+          ? VELOCITY_BUCKETS[velocityGlyph]
+          : undefined
+      // A velocity-row digit on an otherwise-empty slot implies
+      // a default `x` hit at that slot with the bucket's
+      // velocity — saves typing the `x` in the main row.
+      if ((slot === '-' || slot === ' ') && velocityBucket) {
+        slot = 'x'
+      }
       if (slot === '-' || slot === ' ') continue
       // Combining dot-below (U+0323) marks a triplet candidate.
       // Strip it for the note lookup so `x̣` resolves the same as
@@ -759,13 +858,24 @@ function parseMeasure(
       const slotIdx = b * slots.length + p
       const note = resolveNote(spec, instrumentDef, errors, lineName)
       if (note === null) continue
-      const velocity = resolveVelocity(spec, lineDef, instrumentDef)
+      // Velocity row digit, if present, wins over the symbol's
+      // default. Otherwise fall back to resolveVelocity's chain
+      // (per-note spec → line → instrument default).
+      const velocity = velocityBucket
+        ? velocityBucket.mid
+        : resolveVelocity(spec, lineDef, instrumentDef)
       out.push({
         beat: beatPos,
         note,
         velocity,
         channel: DRUM_CHANNEL,
         ...(isTriplet ? { triplet: true } : {}),
+        ...(velocityBucket
+          ? {
+              velocityMin: velocityBucket.min,
+              velocityMax: velocityBucket.max,
+            }
+          : {}),
         slot: slotIdx,
       })
       if (spec.flam !== undefined) {

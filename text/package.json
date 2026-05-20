@@ -3,7 +3,7 @@
   "icon": "view/beat.png",
   "displayName": "BeatText",
   "description": "BeatText Syntax Highlighter for .beat tab files",
-  "version": "1.0.4",
+  "version": "1.0.6",
   "license": "MIT",
   "publisher": "cluesurf",
   "scripts": {
@@ -81,6 +81,10 @@
           },
           {
             "scope": "support.type.value.beat",
+            "settings": { "fontStyle": "", "foreground": "#8BE9FD" }
+          },
+          {
+            "scope": "constant.numeric.velocity.beat",
             "settings": { "fontStyle": "", "foreground": "#8BE9FD" }
           },
           {

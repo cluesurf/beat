@@ -94,16 +94,31 @@ export function humanize(hits: Hit[], config: HumanizeConfig): Hit[] {
 
     let beat = hit.beat
     if (timingSpread > 0 || timingBias !== 0) {
-      // Random jitter ∈ [-spread, +spread], shifted by bias.
-      const jitter = (rng() * 2 - 1) * timingSpread
-      const biasShift = timingBias * timingSpread
-      beat = Math.max(0, hit.beat + jitter + biasShift)
+      if (hit.beat === 0) {
+        // Beat 0 is the loop's downbeat. Any negative shift drops
+        // the hit before the playback's firing window and it
+        // silently disappears. Force positive-only jitter and
+        // discard negative bias so beat 0 always plays.
+        const jitter = rng() * timingSpread
+        const biasShift = Math.max(0, timingBias) * timingSpread
+        beat = hit.beat + jitter + biasShift
+      } else {
+        // Random jitter ∈ [-spread, +spread], shifted by bias.
+        const jitter = (rng() * 2 - 1) * timingSpread
+        const biasShift = timingBias * timingSpread
+        beat = Math.max(0, hit.beat + jitter + biasShift)
+      }
     }
 
     let velocity = hit.velocity ?? 100
     if (velocitySpread > 0) {
       const delta = Math.round((rng() * 2 - 1) * velocitySpread)
-      velocity = clamp(velocity + delta, 1, 127)
+      // If the parser set a bucket range (digit in a velocity
+      // row), clamp jitter inside it so the hit's dynamic stays
+      // in the bucket the user wrote.
+      const lo = hit.velocityMin ?? 1
+      const hi = hit.velocityMax ?? 127
+      velocity = clamp(velocity + delta, lo, hi)
     }
 
     return { ...hit, beat, velocity }

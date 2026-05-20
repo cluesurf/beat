@@ -5,6 +5,7 @@
   "patterns": [
     { "include": "#comments" },
     { "include": "#tab-row" },
+    { "include": "#velocity-row" },
     { "include": "#known-keys" },
     { "include": "#yaml-key" },
     { "include": "#yaml-array" },
@@ -193,6 +194,37 @@
         {
           "name": "invalid.illegal.tab-note.beat",
           "match": "[^\\s|:o\\-xOXJBcdgfr\\u0300-\\u036f]"
+        }
+      ]
+    },
+
+    "velocity-row": {
+      "begin": "^(\\s+)(\\|)",
+      "beginCaptures": {
+        "2": { "name": "constant.language.bar.beat" }
+      },
+      "end": "$",
+      "name": "meta.velocity-row.beat",
+      "patterns": [
+        {
+          "name": "constant.language.bar.beat",
+          "match": "\\|"
+        },
+        {
+          "name": "constant.language.beat-separator.beat",
+          "match": ":"
+        },
+        {
+          "name": "comment.line.silence.beat",
+          "match": "-+"
+        },
+        {
+          "name": "constant.numeric.velocity.beat",
+          "match": "[0-9pPsSmMfFhH]"
+        },
+        {
+          "name": "invalid.illegal.velocity.beat",
+          "match": "[^\\s|:\\-0-9pPsSmMfFhH]"
         }
       ]
     }

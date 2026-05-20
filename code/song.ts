@@ -37,6 +37,11 @@ export type Hit = {
   // Original slot position within the measure (0-indexed). Used
   // by the triplet re-timer; stripped before playback.
   slot?: number
+  // Velocity-bucket bounds set when the hit's velocity came from
+  // a digit (0-9) in a velocity row. Humanize clamps the velocity
+  // jitter to this range so dynamics never cross a bucket.
+  velocityMin?: number
+  velocityMax?: number
 }
 
 export type Pattern = {
