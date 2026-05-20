@@ -94,7 +94,14 @@ export function parse(text: string): ParseResult {
       errors,
       blockIdx + 1,
     )
-    const block = resolveHeader(header, config, errors, blockIdx + 1)
+    const inferred = inferFlowFromRows(rowLines)
+    const block = resolveHeader(
+      header,
+      config,
+      errors,
+      blockIdx + 1,
+      inferred,
+    )
     if (!block) continue
     if (block.part && block.part !== currentPart) {
       currentPart = block.part
@@ -179,16 +186,20 @@ export function parse(text: string): ParseResult {
 // Document splitting
 // ---------------------------------------------------------------
 
-const MEASURE_KEY = /^measure\s*:/
+// The "start a new block" trigger. Either `flow:` (new) or
+// `measure:` (legacy) signals that a tab block follows.
+const MEASURE_KEY = /^(flow|measure)\s*:/
 const TAB_ROW = /^\s*[A-Z][A-Za-z0-9-]*\s*\|/
 // Lines with these keys, when they appear immediately before a
-// `measure:` line (no blank line in between), get pulled into the
-// new block. Lets authors write:
+// `flow:` / `measure:` line (no blank line in between), get pulled
+// into the new block. Lets authors write:
 //   part: bridge-2
-//   measure: 4*5
+//   flow: 7:4
+//   rate: 4:1
 //   ...rows...
-// instead of having to remember to put `part:` after `measure:`.
-const BLOCK_HEADER_KEY = /^(part|time|tempo|humanize)\s*:/
+// instead of having to remember to put `part:` after the block
+// start.
+const BLOCK_HEADER_KEY = /^(part|time|rate|tempo|humanize)\s*:/
 
 function splitDocument(text: string): {
   frontMatterText: string
@@ -385,27 +396,98 @@ function resolveHeader(
   config: DocumentConfig,
   errors: ParseError[],
   blockNumber: number,
+  inferred: { segments: number; slots: number } | null,
 ): BlockHeader | null {
-  const measureText = asString(header.measure)
-  if (!measureText) {
-    errors.push({
-      severity: 'error',
-      message: `Tab block ${blockNumber} missing 'measure:', skipping block.`,
-      location: { block: blockNumber },
-    })
-    return null
+  // Prefer explicit `flow: A:B`. Fall back to legacy
+  // `measure: M*N` (M=subdivisions, N=pulses). Fall back to
+  // inferring from the tab rows.
+  let segments: number | null = null
+  let slots: number | null = null
+
+  const flowText = asString(header.flow)
+  if (flowText) {
+    const f = /^(\d+)\s*:\s*(\d+)$/.exec(flowText)
+    if (!f) {
+      errors.push({
+        severity: 'error',
+        message:
+          `Block ${blockNumber}: invalid flow spec "${flowText}", ` +
+          `expected "segments:slots" (e.g. 7:4).`,
+        location: { block: blockNumber },
+      })
+      return null
+    }
+    segments = Number(f[1])
+    slots = Number(f[2])
+  } else {
+    const measureText = asString(header.measure)
+    if (measureText) {
+      const m = /^(\d+)\s*\*\s*(\d+(?:\.\d+)?)$/.exec(measureText)
+      if (!m) {
+        errors.push({
+          severity: 'error',
+          message:
+            `Block ${blockNumber}: invalid measure spec ` +
+            `"${measureText}", expected "M*N".`,
+          location: { block: blockNumber },
+        })
+        return null
+      }
+      // measure: M*N → M = slots per segment, N = segments
+      slots = Number(m[1])
+      segments = Number(m[2])
+    }
   }
-  const m = /^(\d+)\s*\*\s*(\d+(?:\.\d+)?)$/.exec(measureText)
-  if (!m) {
-    errors.push({
-      severity: 'error',
-      message: `Block ${blockNumber}: invalid measure spec "${measureText}", expected "M*N".`,
-      location: { block: blockNumber },
-    })
-    return null
+
+  if (segments === null || slots === null) {
+    if (!inferred) {
+      errors.push({
+        severity: 'error',
+        message:
+          `Tab block ${blockNumber} missing 'flow:' or 'measure:' ` +
+          `and no tab rows to infer from. Skipping block.`,
+        location: { block: blockNumber },
+      })
+      return null
+    }
+    segments = inferred.segments
+    slots = inferred.slots
+  } else if (inferred) {
+    // Validate the explicit spec against the ASCII.
+    if (
+      inferred.segments !== segments ||
+      inferred.slots !== slots
+    ) {
+      errors.push({
+        severity: 'error',
+        message:
+          `Block ${blockNumber}: declared flow ${segments}:${slots} ` +
+          `does not match tab rows ` +
+          `(rows have ${inferred.segments} segments × ` +
+          `${inferred.slots} slots).`,
+        location: { block: blockNumber },
+      })
+    }
   }
-  const subdivisions = Number(m[1])
-  const pulses = Number(m[2])
+
+  // Rate: X:Y → X slots = Y BPM beats. Defaults to 4:1 (4 slots
+  // per quarter-note beat, i.e. each slot is a 16th note).
+  let rate: BlockHeader['rate'] = { slots: 4, beats: 1 }
+  const rateText = asString(header.rate)
+  if (rateText) {
+    const r = /^(\d+)\s*:\s*(\d+)$/.exec(rateText)
+    if (!r) {
+      errors.push({
+        severity: 'error',
+        message:
+          `Block ${blockNumber}: invalid rate spec "${rateText}", ` +
+          `expected "slots:beats" (e.g. 4:1).`,
+        location: { block: blockNumber },
+      })
+    } else {
+      rate = { slots: Number(r[1]), beats: Number(r[2]) }
+    }
+  }
 
   let time: BlockHeader['time']
   const timeText = asString(header.time)
@@ -423,7 +505,8 @@ function resolveHeader(
   }
 
   return {
-    measure: { subdivisions, pulses },
+    measure: { subdivisions: slots, pulses: segments },
+    rate,
     time,
     tempo: asNumber(header.tempo) ?? config.tempo,
     humanize: asHumanize(header.humanize) ?? config.humanize,
@@ -431,7 +514,36 @@ function resolveHeader(
   }
 }
 
+// Look at the first well-formed `|seg:seg:...:seg|` row in a
+// block and read off its structure. Returns null if no rows are
+// usable (block has no tab content, or rows are malformed).
+function inferFlowFromRows(
+  rowLines: string[],
+): { segments: number; slots: number } | null {
+  for (const line of rowLines) {
+    const pipeStart = line.indexOf('|')
+    const pipeEnd = line.lastIndexOf('|')
+    if (pipeStart < 0 || pipeEnd <= pipeStart) continue
+    const inner = line.slice(pipeStart + 1, pipeEnd)
+    const groups = inner.split(':')
+    if (groups.length === 0) continue
+    const slotsCount = groups[0]!.length
+    if (slotsCount === 0) continue
+    if (!groups.every(g => g.length === slotsCount)) continue
+    return { segments: groups.length, slots: slotsCount }
+  }
+  return null
+}
+
 function computeBeatsPerMeasure(block: BlockHeader): number {
+  // Preferred: derive from rate. slotsPerMeasure / slotsPerBeat.
+  if (block.rate) {
+    const slotsPerMeasure =
+      block.measure.subdivisions * block.measure.pulses
+    const slotsPerBeat = block.rate.slots / block.rate.beats
+    return slotsPerMeasure / slotsPerBeat
+  }
+  // Legacy: pulses × (4 / time.denominator) quarter notes.
   const denominator = block.time?.denominator ?? 4
   const pulseInQuarters = 4 / denominator
   return block.measure.pulses * pulseInQuarters

@@ -1,5 +1,7 @@
 packages:
   - 'code'
+allowBuilds:
+  abletonlink: true
 
 # Centralized version pins. Sub-packages reference these via
 # `"<pkg>": "catalog:"` in their own package.json so a version

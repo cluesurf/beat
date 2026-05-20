@@ -34,10 +34,19 @@ export type LineDef = {
 }
 
 export type BlockHeader = {
-  // Grid resolution + pulses per measure: M*N
+  // Grid resolution + pulses per measure. Populated from either
+  // `flow: A:B` (preferred) where A=segments, B=slots-per-segment,
+  // or legacy `measure: M*N` where M=subdivisions, N=pulses.
+  // Internally we keep subdivisions=B, pulses=A so the rest of
+  // the parser stays the same.
   measure: { subdivisions: number; pulses: number }
-  // Time signature; pulse = a 4/denominator note.
+  // Maps slots → BPM beats. Populated from `rate: X:Y` (preferred)
+  // where X=slots, Y=beats. If omitted, derived from legacy
+  // `time: N/D` or defaults so that 1 pulse = 1 quarter note.
+  rate?: { slots: number; beats: number }
+  // Legacy time signature; pulse = a 4/denominator note.
   // Default {numerator: pulses, denominator: 4} → quarter pulses.
+  // Kept for backward compatibility with `time: N/D`.
   time?: { numerator: number; denominator: number }
   tempo?: number
   humanize?: HumanizeConfig

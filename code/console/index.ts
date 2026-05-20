@@ -9,6 +9,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import { playCommand } from './play'
+import { stopCommand } from './stop'
 import { tryCommand } from './try'
 import { loopCommand } from './loop'
 import { listPortsCommand } from './list-ports'
@@ -18,6 +19,7 @@ import { exportCommand } from './export'
 await yargs(hideBin(process.argv))
   .scriptName('beat')
   .command(playCommand)
+  .command(stopCommand)
   .command(tryCommand)
   .command(loopCommand)
   .command(listPortsCommand)

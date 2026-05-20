@@ -12,11 +12,16 @@
   "bin": {
     "beat": "host/code/console/beat.js"
   },
-  "files": ["host", "readme.md", "license.md"],
+  "files": [
+    "host",
+    "readme.md",
+    "license.md"
+  ],
   "scripts": {
     "try": "tsx code/console/index.ts try",
     "check": "tsx code/console/index.ts list-ports",
-    "play": "tsx code/console/index.ts play",
+    "stop": "tsx code/console/index.ts stop",
+    "play": "tsx code/console/index.ts stop && tsx code/console/index.ts play",
     "export": "tsx code/console/index.ts export",
     "test": "pnpm exec vitest run",
     "text:make": "cd text && pnpm exec vsce package",
@@ -30,6 +35,7 @@
   "prettier": "@cluesurf/wash/flow.json",
   "dependencies": {
     "@types/lodash-es": "catalog:",
+    "abletonlink": "0.2.0-beta.0",
     "easymidi": "catalog:",
     "lodash-es": "catalog:",
     "yaml": "catalog:",
