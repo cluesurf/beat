@@ -3,7 +3,7 @@
   "icon": "view/beat.png",
   "displayName": "BeatText",
   "description": "BeatText Syntax Highlighter for .beat tab files",
-  "version": "1.0.6",
+  "version": "1.0.8",
   "license": "MIT",
   "publisher": "cluesurf",
   "scripts": {
