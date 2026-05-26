@@ -14,6 +14,7 @@ import { tryCommand } from './try'
 import { loopCommand } from './loop'
 import { listPortsCommand } from './list-ports'
 import { testAllCommand } from './test-all'
+import { findNoteCommand } from './find-note'
 import { exportCommand } from './export'
 
 await yargs(hideBin(process.argv))
@@ -24,6 +25,7 @@ await yargs(hideBin(process.argv))
   .command(loopCommand)
   .command(listPortsCommand)
   .command(testAllCommand)
+  .command(findNoteCommand)
   .command(exportCommand)
   .demandCommand(1)
   .strict()

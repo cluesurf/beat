@@ -15,6 +15,7 @@
 //     x: { note: 50 }       # override the note for `x` on this line
 
 import { NOTE } from '../note'
+import { KIT_CHANNEL } from '../route'
 import type { InstrumentDef, LineDef, NoteSpec } from './types'
 
 // ---------------------------------------------------------------
@@ -24,6 +25,7 @@ import type { InstrumentDef, LineDef, NoteSpec } from './types'
 export const DRUMKIT_INSTRUMENTS: Record<string, InstrumentDef> = {
   hihat: {
     name: 'hihat',
+    channel: KIT_CHANNEL.HI_HAT,
     articulations: {
       closed: NOTE.closedHat,
       open: NOTE.openHat,
@@ -45,6 +47,7 @@ export const DRUMKIT_INSTRUMENTS: Record<string, InstrumentDef> = {
 
   'hihat-pedal': {
     name: 'hihat-pedal',
+    channel: KIT_CHANNEL.HI_HAT,
     articulations: { pedal: NOTE.pedalHat },
     defaultArticulation: 'pedal',
     defaultVelocity: 90,
@@ -53,6 +56,7 @@ export const DRUMKIT_INSTRUMENTS: Record<string, InstrumentDef> = {
 
   snare: {
     name: 'snare',
+    channel: KIT_CHANNEL.SNARE,
     articulations: {
       wired: NOTE.snare,
       ghost: NOTE.snareGhost,
@@ -80,6 +84,7 @@ export const DRUMKIT_INSTRUMENTS: Record<string, InstrumentDef> = {
 
   kick: {
     name: 'kick',
+    channel: KIT_CHANNEL.KICK,
     articulations: { main: NOTE.kick, alt: NOTE.kickAlt },
     defaultArticulation: 'main',
     defaultVelocity: 100,
@@ -93,19 +98,20 @@ export const DRUMKIT_INSTRUMENTS: Record<string, InstrumentDef> = {
     },
   },
 
-  'tom-1': singleArticulationTom('tom-1', NOTE.tomHigh),
-  'tom-2': singleArticulationTom('tom-2', NOTE.tomMid),
-  'tom-3': singleArticulationTom('tom-3', NOTE.tomLow),
-  'tom-4': singleArticulationTom('tom-4', NOTE.floorTom),
-  'tom-5': singleArticulationTom('tom-5', NOTE.floorTomLow),
+  'tom-1': singleArticulationTom('tom-1', NOTE.tomHigh, KIT_CHANNEL.TOM_1),
+  'tom-2': singleArticulationTom('tom-2', NOTE.tomMid, KIT_CHANNEL.TOM_2),
+  'tom-3': singleArticulationTom('tom-3', NOTE.tomLow, KIT_CHANNEL.TOM_3),
+  'tom-4': singleArticulationTom('tom-4', NOTE.floorTom, KIT_CHANNEL.TOM_4),
+  'tom-5': singleArticulationTom('tom-5', NOTE.floorTomLow, KIT_CHANNEL.TOM_5),
 
-  'crash-1': cymbal('crash-1', NOTE.crashLeft, NOTE.crashLeftChoke),
-  'crash-2': cymbal('crash-2', NOTE.crashRight, NOTE.crashRightChoke),
-  china: cymbal('china', NOTE.china, NOTE.chinaChoke),
-  splash: cymbal('splash', NOTE.splash, NOTE.splashChoke),
+  'crash-1': cymbal('crash-1', NOTE.crashLeft, NOTE.crashLeftChoke, KIT_CHANNEL.CRASH_1),
+  'crash-2': cymbal('crash-2', NOTE.crashRight, NOTE.crashRightChoke, KIT_CHANNEL.CRASH_2),
+  china: cymbal('china', NOTE.china, NOTE.chinaChoke, KIT_CHANNEL.CHINA),
+  splash: cymbal('splash', NOTE.splash, NOTE.splashChoke, KIT_CHANNEL.SPLASH),
 
   ride: {
     name: 'ride',
+    channel: KIT_CHANNEL.RIDE,
     articulations: {
       tip: NOTE.rideTip,
       bell: NOTE.rideBell,
@@ -130,9 +136,11 @@ export const DRUMKIT_INSTRUMENTS: Record<string, InstrumentDef> = {
 function singleArticulationTom(
   name: string,
   note: number,
+  channel: number,
 ): InstrumentDef {
   return {
     name,
+    channel,
     articulations: { main: note },
     defaultArticulation: 'main',
     defaultVelocity: 95,
@@ -151,9 +159,11 @@ function cymbal(
   name: string,
   hit: number,
   choke: number,
+  channel: number,
 ): InstrumentDef {
   return {
     name,
+    channel,
     articulations: { main: hit, choke },
     defaultArticulation: 'main',
     defaultVelocity: 100,

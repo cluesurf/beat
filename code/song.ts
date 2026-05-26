@@ -19,6 +19,7 @@
 //   Carey trick — without the pattern data getting noisy.
 
 import { DRUM_CHANNEL } from './note'
+import { DEFAULT_BUS } from './route'
 import type { HumanizeConfig } from './humanize'
 
 export type Hit = {
@@ -29,6 +30,10 @@ export type Hit = {
   velocity?: number   // 1-127, default 110
   durationMs?: number // default 120 — drums don't really care
   channel?: number    // default DRUM_CHANNEL (10 in human terms)
+  // IAC port (bus) name fragment this hit routes to. Default:
+  // DEFAULT_BUS (the lean single port). Set per-instrument for
+  // the deep multi-family rig. See code/route.ts.
+  port?: string
   // Set by the tab parser when this hit came from a dotted-below
   // glyph (e.g. `x̣`). Tells the post-parse re-timer to fold the
   // hit into a triplet group with its column neighbours. Stripped
@@ -65,6 +70,8 @@ export type Song = {
   bpm: number
   // Optional default channel for any hit that doesn't set one.
   channel?: number
+  // Optional default IAC port for any hit that doesn't set one.
+  port?: string
   patterns: Pattern[]
   // Order to play patterns in.
   arrangement: Section[]
@@ -73,8 +80,84 @@ export type Song = {
   humanize?: HumanizeConfig
 }
 
+// One problem found while expanding a song. Non-fatal (unknown
+// pattern refs still throw); these are clamp/skip-worthy issues.
+export type SongIssue = {
+  message: string
+  severity: 'error' | 'warning'
+  pattern?: string
+  beat?: number
+}
+
+// Validate a song without expanding it. Catches the common
+// authoring mistakes: hits past the pattern length, out-of-range
+// velocities/channels, unknown pattern references. Returns every
+// issue (doesn't stop at the first) so authors fix them in one
+// pass. `expandSong` runs this and throws only on unknown patterns.
+export function validateSong(song: Song): SongIssue[] {
+  const issues: SongIssue[] = []
+  const names = new Set(song.patterns.map(p => p.name))
+
+  for (const section of song.arrangement) {
+    if (!names.has(section.pattern)) {
+      issues.push({
+        message: `arrangement references unknown pattern "${section.pattern}"`,
+        severity: 'error',
+        pattern: section.pattern,
+      })
+    }
+  }
+
+  for (const pattern of song.patterns) {
+    if (pattern.beats <= 0) {
+      issues.push({
+        message: `pattern "${pattern.name}" has non-positive beats (${pattern.beats})`,
+        severity: 'error',
+        pattern: pattern.name,
+      })
+    }
+    for (const hit of pattern.hits) {
+      if (hit.beat < 0 || hit.beat >= pattern.beats) {
+        issues.push({
+          message: `hit at beat ${hit.beat} is outside pattern "${pattern.name}" length (0..${pattern.beats})`,
+          severity: 'warning',
+          pattern: pattern.name,
+          beat: hit.beat,
+        })
+      }
+      if (hit.note < 0 || hit.note > 127) {
+        issues.push({
+          message: `hit note ${hit.note} out of MIDI range (0-127) in "${pattern.name}"`,
+          severity: 'error',
+          pattern: pattern.name,
+          beat: hit.beat,
+        })
+      }
+      if (hit.velocity !== undefined && (hit.velocity < 1 || hit.velocity > 127)) {
+        issues.push({
+          message: `hit velocity ${hit.velocity} out of range (1-127) in "${pattern.name}"`,
+          severity: 'warning',
+          pattern: pattern.name,
+          beat: hit.beat,
+        })
+      }
+      if (hit.channel !== undefined && (hit.channel < 0 || hit.channel > 15)) {
+        issues.push({
+          message: `hit channel ${hit.channel} out of range (0-15) in "${pattern.name}"`,
+          severity: 'error',
+          pattern: pattern.name,
+          beat: hit.beat,
+        })
+      }
+    }
+  }
+  return issues
+}
+
 // Helper: resolve `arrangement` into a flat hit list with
 // absolute beat positions. The player calls this once per song.
+// Stamps the resolved channel + port onto every hit so downstream
+// (humanize, routing) never has to re-derive them.
 export function expandSong(song: Song): Hit[] {
   const byName = new Map(song.patterns.map(p => [p.name, p]))
   const out: Hit[] = []
@@ -94,6 +177,7 @@ export function expandSong(song: Song): Hit[] {
           ...hit,
           beat: hit.beat + cursor,
           channel: hit.channel ?? song.channel ?? DRUM_CHANNEL,
+          port: hit.port ?? song.port ?? DEFAULT_BUS,
         })
       }
       cursor += pattern.beats

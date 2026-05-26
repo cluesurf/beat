@@ -427,7 +427,7 @@ K|x---:x---:x---:x---|
 `)
     expect(
       r.errors.some(e =>
-        e.message.includes('Unknown instrument "marimba"'),
+        e.message.includes('Unknown instrument pack "marimba"'),
       ),
     ).toBe(true)
     // Falls back to drumkit so K still works.

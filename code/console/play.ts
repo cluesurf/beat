@@ -16,10 +16,9 @@ import easymidi from 'easymidi'
 import { debounce } from 'lodash-es'
 import type { Argv, CommandModule } from 'yargs'
 
-import { openDrumOutput } from '@/code/output'
+import { MidiRouter } from '@/code/output'
 import { sendHit } from '@/code/hit'
 import { expandSong, type Hit, type Song } from '@/code/song'
-import { DRUM_CHANNEL } from '@/code/note'
 import { humanize, HUMANIZE, type HumanizePreset } from '@/code/humanize'
 import { expandArrangement, type BarInfo } from '@/code/arrangement'
 import { parse as parseTab } from '@/code/tab/index'
@@ -244,13 +243,16 @@ async function runPlay(args: Args): Promise<void> {
     return song
   }
 
-  const output = openDrumOutput()
+  const router = new MidiRouter()
+  // Default-port handle for MIDI clock / transport (--sync master).
+  // resolve() opens the default bus lazily on first use.
+  const transport = (): easymidi.Output => router.resolve()
   let timers: NodeJS.Timeout[] = []
   const sounding = new Set<number>()
 
   function patchedSendHit(hit: Hit): void {
     sounding.add(hit.note)
-    sendHit(output, hit)
+    sendHit(router.resolve(hit.port), hit)
     setTimeout(
       () => sounding.delete(hit.note),
       (hit.durationMs ?? 120) + 50,
@@ -260,19 +262,15 @@ async function runPlay(args: Args): Promise<void> {
   function stop(): void {
     for (const t of timers) clearTimeout(t)
     timers = []
-    for (let ch = 0; ch < 16; ch++) {
-      output.send('cc', {
-        controller: 123,
-        value: 0,
-        channel: ch as easymidi.Channel,
-      })
-    }
-    for (const note of sounding) {
-      output.send('noteoff', {
-        note,
-        velocity: 0,
-        channel: DRUM_CHANNEL as easymidi.Channel,
-      })
+    // All-notes-off + sustain-off on every open port / channel.
+    for (const out of router.all()) {
+      for (let ch = 0; ch < 16; ch++) {
+        out.send('cc', {
+          controller: 123,
+          value: 0,
+          channel: ch as easymidi.Channel,
+        })
+      }
     }
     sounding.clear()
   }
@@ -470,7 +468,7 @@ async function runPlay(args: Args): Promise<void> {
   process.on('SIGINT', () => {
     console.log('\n[beat] stopping')
     stop()
-    output.close()
+    router.closeAll()
     process.exit(0)
   })
 
@@ -479,14 +477,14 @@ async function runPlay(args: Args): Promise<void> {
   if (args.sync === 'master') {
     await runMaster(song)
     stop()
-    output.close()
+    router.closeAll()
     return
   }
 
   if (args.sync === 'link') {
     await runLink(song)
     stop()
-    output.close()
+    router.closeAll()
     return
   }
 
@@ -505,7 +503,7 @@ async function runPlay(args: Args): Promise<void> {
   }
 
   stop()
-  output.close()
+  router.closeAll()
 
   // -------------------------------------------------------------
   // Master mode: this script generates 24 PPQN MIDI clock and
@@ -593,7 +591,7 @@ async function runPlay(args: Args): Promise<void> {
       if (!playing) return
 
       // Send clock first so Logic's tick aligns with our hit fire.
-      output.send('clock')
+      transport().send('clock')
 
       if (dirty) {
         dirty = false
@@ -640,8 +638,8 @@ async function runPlay(args: Args): Promise<void> {
       if (playing) return
       // SPP=0 then start. Per MIDI spec, start arms the slave;
       // the first clock after start is downbeat. Logic locks on.
-      output.send('position', { value: 0 })
-      output.send('start')
+      transport().send('position', { value: 0 })
+      transport().send('start')
       tick = 0
       lastSection = -1
       playing = true
@@ -657,7 +655,7 @@ async function runPlay(args: Args): Promise<void> {
         clearTimeout(nextTimer)
         nextTimer = null
       }
-      output.send('stop')
+      transport().send('stop')
       stop()
       console.log('[beat] ■ stop')
     }

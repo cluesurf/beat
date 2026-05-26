@@ -24,6 +24,13 @@ export type InstrumentDef = {
   defaultArticulation: string
   defaultVelocity: Velocity
   notes: Record<string, NoteSpec>
+  // Default MIDI channel (0-15) this piece routes to, so each
+  // kit piece can land on its own Ableton track. Unset → falls
+  // back to DRUM_CHANNEL (the lean by-note single-channel setup).
+  channel?: number
+  // Default IAC port (bus) fragment. Unset → the song's default
+  // bus. Used by multi-family rigs (world/cinematic/electronic).
+  port?: string
 }
 
 export type LineDef = {
@@ -31,6 +38,9 @@ export type LineDef = {
   velocity?: Velocity
   humanize?: HumanizeConfig
   notes: Record<string, NoteSpec>
+  // Per-line overrides of the instrument's default route.
+  channel?: number
+  port?: string
 }
 
 export type BlockHeader = {
@@ -60,6 +70,9 @@ export type DocumentConfig = {
   instrument: string
   tempo: number
   humanize?: HumanizeConfig
+  // The active pack's instrument definitions, keyed by name.
+  // parseRow resolves each line's instrument against this.
+  instruments: Record<string, InstrumentDef>
   lines: Record<string, LineDef>
   globalNotes: Record<string, NoteSpec>
 }

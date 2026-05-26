@@ -38,11 +38,8 @@ function parseYaml(text: string): YamlObject {
   }
   return parsed as YamlObject
 }
-import {
-  DRUMKIT_INSTRUMENTS,
-  DRUMKIT_LINES,
-  resolveNoteSpec,
-} from './drum'
+import { resolveNoteSpec } from './drum'
+import { resolvePack } from './pack'
 import type {
   BlockHeader,
   DocumentConfig,
@@ -379,16 +376,17 @@ function resolveConfig(
   const tempo = asNumber(yaml.tempo) ?? 100
   const humanize = asHumanize(yaml.humanize)
 
-  if (instrument !== 'drumkit') {
+  const { pack, known } = resolvePack(instrument)
+  if (!known) {
     errors.push({
       severity: 'error',
-      message: `Unknown instrument "${instrument}", falling back to drumkit.`,
+      message: `Unknown instrument pack "${instrument}", falling back to drumkit.`,
     })
     instrument = 'drumkit'
   }
 
   const lines: Record<string, LineDef> = {}
-  for (const [name, def] of Object.entries(DRUMKIT_LINES)) {
+  for (const [name, def] of Object.entries(pack.lines)) {
     lines[name] = { ...def, notes: { ...def.notes } }
   }
   const globalNotes: Record<string, NoteSpec> = {}
@@ -420,7 +418,14 @@ function resolveConfig(
     }
   }
 
-  return { instrument, tempo, humanize, lines, globalNotes }
+  return {
+    instrument,
+    tempo,
+    humanize,
+    instruments: pack.instruments,
+    lines,
+    globalNotes,
+  }
 }
 
 function mergeLine(
@@ -442,10 +447,15 @@ function mergeLine(
     instrument,
     velocity: asVelocity(override.velocity) ?? existing?.velocity,
     humanize: asHumanize(override.humanize) ?? existing?.humanize,
+    channel: asNumber(override.channel) ?? existing?.channel,
+    port: asString(override.port) ?? existing?.port,
     notes: { ...(existing?.notes ?? {}) },
   }
   for (const [key, value] of Object.entries(override)) {
-    if (['instrument', 'velocity', 'humanize'].includes(key)) continue
+    if (
+      ['instrument', 'velocity', 'humanize', 'channel', 'port'].includes(key)
+    )
+      continue
     const obj = asObject(value)
     if (!obj) {
       errors.push({
@@ -671,17 +681,22 @@ function stripParseMeta(hit: Hit): Hit {
 }
 
 function computeBeatsPerMeasure(block: BlockHeader): number {
-  // Preferred: derive from rate. slotsPerMeasure / slotsPerBeat.
+  // An explicit time signature wins: each pulse is a 1/denominator
+  // note, so a measure is pulses × (4 / denominator) quarter-note
+  // beats. (5/8 → 5 × 4/8 = 2.5.) `rate` always carries a default,
+  // so we check `time` first to let it override that default.
+  if (block.time) {
+    return block.measure.pulses * (4 / block.time.denominator)
+  }
+  // Otherwise derive from the slot grid: slotsPerMeasure / slotsPerBeat.
   if (block.rate) {
     const slotsPerMeasure =
       block.measure.subdivisions * block.measure.pulses
     const slotsPerBeat = block.rate.slots / block.rate.beats
     return slotsPerMeasure / slotsPerBeat
   }
-  // Legacy: pulses × (4 / time.denominator) quarter notes.
-  const denominator = block.time?.denominator ?? 4
-  const pulseInQuarters = 4 / denominator
-  return block.measure.pulses * pulseInQuarters
+  // Final fallback (no rate, no time): one pulse = one quarter note.
+  return block.measure.pulses
 }
 
 // ---------------------------------------------------------------
@@ -715,7 +730,7 @@ function parseRow(
     })
     return null
   }
-  const instrumentDef = DRUMKIT_INSTRUMENTS[lineDef.instrument]
+  const instrumentDef = config.instruments[lineDef.instrument]
   if (!instrumentDef) {
     errors.push({
       severity: 'error',
@@ -789,6 +804,13 @@ function parseMeasure(
     return []
   }
 
+  // Per-piece route. The instrument carries its default channel
+  // (kick→1, snare→2, …) so each piece lands on its own Ableton
+  // track; a line can override. Port defaults to the song bus.
+  const routeChannel =
+    lineDef.channel ?? instrumentDef.channel ?? DRUM_CHANNEL
+  const routePort = lineDef.port ?? instrumentDef.port
+
   const out: Hit[] = []
   for (let b = 0; b < beats.length; b++) {
     const beatText = beats[b]
@@ -824,18 +846,23 @@ function parseMeasure(
         slot = 'x'
       }
       if (slot === '-' || slot === ' ') continue
-      // Combining dot-below (U+0323) marks a triplet candidate.
-      // Strip it for the note lookup so `x̣` resolves the same as
-      // `x` — the triplet semantics live in the re-timer, not the
-      // glyph table.
-      const isTriplet = slot.includes('̣')
-      const lookup = isTriplet ? slot.replace(/̣/g, '') : slot
-      const spec = resolveNoteSpec(
-        lookup,
-        lineDef,
-        instrumentDef,
-        globalNotes,
-      )
+      // Try the FULL grapheme first — a user may define a diacritic
+      // glyph (e.g. `x̣`) as a distinct note in front matter. Only
+      // when the full glyph isn't defined AND it carries the
+      // combining dot-below (U+0323) do we treat the dot as a
+      // triplet marker and resolve the base glyph instead. (Triplet
+      // semantics live in the re-timer, not the glyph table.)
+      let isTriplet = false
+      let spec = resolveNoteSpec(slot, lineDef, instrumentDef, globalNotes)
+      if (!spec && slot.includes('̣')) {
+        isTriplet = true
+        spec = resolveNoteSpec(
+          slot.replace(/̣/g, ''),
+          lineDef,
+          instrumentDef,
+          globalNotes,
+        )
+      }
       if (!spec) {
         errors.push({
           severity: 'error',
@@ -868,7 +895,8 @@ function parseMeasure(
         beat: beatPos,
         note,
         velocity,
-        channel: DRUM_CHANNEL,
+        channel: routeChannel,
+        ...(routePort ? { port: routePort } : {}),
         ...(isTriplet ? { triplet: true } : {}),
         ...(velocityBucket
           ? {
@@ -883,7 +911,8 @@ function parseMeasure(
           beat: beatPos - spec.flam,
           note,
           velocity: 50,
-          channel: DRUM_CHANNEL,
+          channel: routeChannel,
+          ...(routePort ? { port: routePort } : {}),
         })
       }
     }

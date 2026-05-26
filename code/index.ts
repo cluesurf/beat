@@ -16,15 +16,30 @@ export { humanize, HUMANIZE, type HumanizeConfig, type HumanizePreset } from './
 // Song / Hit / Pattern types and helpers
 export {
   expandSong,
+  validateSong,
   type Hit,
   type Pattern,
   type Section,
   type Song,
+  type SongIssue,
 } from './song'
 export { expandArrangement, type BarInfo } from './arrangement'
 
 // Drum constants
 export { NOTE, DRUM_CHANNEL } from './note'
+
+// Routing: ports (IAC buses) + per-family channel maps
+export {
+  BUS,
+  DEFAULT_BUS,
+  KIT_CHANNEL,
+  WORLD_CHANNEL,
+  CINEMATIC_CHANNEL,
+  ELECTRONIC_CHANNEL,
+  type Bus,
+  type Route,
+} from './route'
+export { MidiRouter, openDrumOutput } from './output'
 
 // Tab parser internals (advanced)
 export type {
@@ -39,6 +54,9 @@ export type {
   Velocity,
 } from './tab/index'
 export { DRUMKIT_INSTRUMENTS, DRUMKIT_LINES } from './tab/drum'
+
+// Instrument packs (drumkit / world / cinematic / electronic)
+export { PACKS, DEFAULT_PACK, resolvePack, type Pack } from './tab/pack'
 
 // MIDI export
 export { exportSongToMidi, type ExportConfig } from './export/midi'

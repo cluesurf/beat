@@ -21,9 +21,8 @@ import easymidi from 'easymidi'
 import { expandSong, type Hit, type Song } from './song'
 import { humanize, HUMANIZE, type HumanizePreset } from './humanize'
 import type { HumanizeConfig } from './humanize'
-import { openDrumOutput } from './output'
+import { MidiRouter } from './output'
 import { sendHit } from './hit'
-import { DRUM_CHANNEL } from './note'
 
 export type PlayOptions = {
   // Loop forever until stop() is called. Default: false (one pass).
@@ -43,36 +42,33 @@ export type PlayOptions = {
 export type Stop = () => Promise<void>
 
 export function play(song: Song, opts: PlayOptions = {}): Stop {
-  const output = openDrumOutput()
+  const router = new MidiRouter(song.port)
   let timers: NodeJS.Timeout[] = []
   const sounding = new Set<number>()
   let stopped = false
 
   function patchedSendHit(hit: Hit): void {
     sounding.add(hit.note)
-    sendHit(output, hit)
+    sendHit(router.resolve(hit.port), hit)
     setTimeout(() => sounding.delete(hit.note), (hit.durationMs ?? 120) + 50)
   }
 
   function teardown(): void {
     for (const t of timers) clearTimeout(t)
     timers = []
-    for (let ch = 0; ch < 16; ch++) {
-      output.send('cc', {
-        controller: 123,
-        value: 0,
-        channel: ch as easymidi.Channel,
-      })
-    }
-    for (const note of sounding) {
-      output.send('noteoff', {
-        note,
-        velocity: 0,
-        channel: DRUM_CHANNEL as easymidi.Channel,
-      })
+    // All-notes-off + sustain-off across every port we opened, on
+    // every channel — the rig may span multiple buses/channels.
+    for (const output of router.all()) {
+      for (let ch = 0; ch < 16; ch++) {
+        output.send('cc', {
+          controller: 123,
+          value: 0,
+          channel: ch as easymidi.Channel,
+        })
+      }
     }
     sounding.clear()
-    output.close()
+    router.closeAll()
   }
 
   function schedulePass(): Promise<void> {
