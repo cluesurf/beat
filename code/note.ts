@@ -1,55 +1,90 @@
 // Canonical drum-note map. MIDI note numbers, kept in one place
 // so patterns reference names instead of magic ints.
 //
-// Layout follows the **Superior Drummer 3 Core Library default
-// mapping** (Toontrack's extension of General MIDI). When in
-// doubt, open SD3 → Settings → MIDI In/E-Drums → Mapping to see
-// what each note triggers in the currently loaded kit.
+// Source of truth: cluesurf/note/music/drums/sd3-midi-mapping-v2.md
+// That doc is the actual auto-generated SD3 mapping captured from
+// the Danny Carey replication kit (13 pieces, Sonor SQ2 toms,
+// Tama Bell Brass snare, Paiste 2002 cymbals, etc.).
 //
-// The SD3 Core Library exposes far more than GM's 47 percussion
-// notes — typically 100+ articulations per kit. They're grouped
-// by drum below: each drum's main hit comes first, then its
-// variants (rim, ghost, edge, choke, etc.).
+// Pre-v2 versions of this file used the General MIDI 1990
+// standard. SD3's actual mapping is much richer:
+//
+//   1. SD3 articulation vocabulary is bigger than GM (8 snare
+//      articulations vs GM's 3, etc).
+//   2. SD3 spreads articulations across the full 0-127 range, not
+//      just GM's 35-81 zone.
+//   3. The Danny kit has 6 cymbal slots + 2 chinas + spock + splash,
+//      where GM only knows Crash 1 / Crash 2.
+//   4. SD3 includes Zone / Tip / Edge trigger notes for e-drum
+//      hardware — inert when playing from a keyboard or DAW.
+//
+// When in doubt, open SD3 → Settings → MIDI In/E-Drums → Mapping
+// to see what each note triggers in the currently loaded kit.
 
 // ---------------------------------------------------------------
 // MIDI channel
 // ---------------------------------------------------------------
 //
 // MIDI uses 0-indexed channels in the wire protocol; humans
-// label them 1-16. Drums conventionally live on channel 10
-// (which is index 9 here).
+// label them 1-16. The General MIDI convention is channel 10
+// (index 9) for drums, but Ableton's default MIDI track receives
+// on Ch. 1 (index 0), and SD3 inside Ableton is typically routed
+// that way. So the lean default is **channel 0 = Ableton Ch. 1**.
+//
+// If your SD3 track is set to receive on Ch. 10 instead, change
+// this to 9.
 
-export const DRUM_CHANNEL = 9
+export const DRUM_CHANNEL = 0
 
 // ---------------------------------------------------------------
 // NOTE — flat lookup table used by patterns
 // ---------------------------------------------------------------
 //
-// Sorted by MIDI note number ascending within each section. Most
-// patterns only need the "main" entry per drum (kick, snare,
-// closedHat, tomHigh, crashLeft, ride). The variant articulations
-// are there for when you want fills with rim ghosts, hi-hat
-// openness sweeps, ride bell ostinatos, choked crashes, etc.
+// Names follow the semantic convention used by pattern files
+// (kick, snare, closedHat, tomHigh, crashLeft, ride, etc.).
+// MIDI numbers reflect the v2 mapping captured from SD3.
+//
+// Where v2 provides multiple notes for the same articulation
+// (e.g. Snare Center appears on notes 38, 66, 68, 70, 125), this
+// table chooses the lowest GM-standard note as the canonical one
+// and leaves the duplicates accessible via the *Alt suffixes.
 
 export const NOTE = {
-  // Kick ------------------------------------------------------
-  kickAlt: 35,             // GM "Acoustic Bass Drum" — second kick zone
-  kick: 36,                // GM "Bass Drum 1" — main kick
+  // Kick (v2: "Kick: Right" on 34, 35, 36) -------------------
+  kickAltLow: 34,          // alternate trigger
+  kickAlt: 35,             // alternate trigger
+  kick: 36,                // primary kick
 
-  // Snare -----------------------------------------------------
-  snareSidestick: 37,      // cross-stick / sidestick
-  snare: 38,               // main snare hit
-  snareHandClap: 39,       // hand clap (or some kits: rim click)
-  snareRim: 40,            // rimshot — full hit with rim contact
-  snareRimOnly: 91,        // rim-only (no head)
-  snareGhost: 92,          // soft ghost note (Core extension)
-  snareFlam: 93,           // flam articulation
-  snareDrag: 94,           // drag articulation
-  snareRoll: 95,           // buzz roll trigger
+  // Snare (v2: Center/Rimshot/Sidestick/Edge/Flam/Closed Roll
+  // /Rim Only/Zone Trigger across 33, 37, 38, 39, 40, 66-71,
+  // 125-127) ------------------------------------------------
+  snareZoneTrigger: 6,     // e-drum zone trigger (inert from DAW)
+  snareEdge: 33,           // edge hit
+  snareSidestick: 37,      // cross-stick
+  snare: 38,               // primary snare hit (Center)
+  snareRoll: 39,           // Closed Roll
+  snareRim: 40,            // rimshot — full hit with rim
+  snareCenterAlt1: 66,     // duplicate of Snare Center
+  snareSidestickAlt: 67,   // duplicate of Sidestick
+  snareCenterAlt2: 68,     // duplicate of Snare Center
+  snareFlam: 69,           // flam articulation
+  snareCenterAlt3: 70,     // duplicate of Snare Center
+  snareRimOnly: 71,        // rim-only (no head)
+  snareCenterHigh: 125,    // top-octave duplicate of Center
+  snareRimHigh: 126,       // top-octave duplicate of Rimshot
+  snareSidestickHigh: 127, // top-octave duplicate of Sidestick
+  // Compat alias for pattern files that still reference
+  // NOTE.snareGhost — map to Center; ghost-feel is achieved via
+  // low velocity in drum.ts (typically 25-40).
+  snareGhost: 38,
 
-  // Hi-hat (lots of variants — closed → open continuum) ------
-  hiHatTipClosed: 22,      // tip on bow, fully closed
-  hiHatTipOpen: 26,        // tip on bow, slightly open
+  // Hi-hat (v2: huge articulation set across 7-26, 42, 44, 46,
+  // 60-65, 119-124) -----------------------------------------
+  // Low-zone e-drum triggers
+  hiHatEdgeTrigger: 7,
+  hiHatTipTrigger: 8,
+  hiHatTipTriggerAlt: 9,
+  // Closed/pedal/open variants in the 10-17 zone
   hiHatClosedPedal: 10,    // pedal-closed, struck
   hiHatClosedEdge: 11,     // closed, struck on edge
   hiHatOpen0: 12,          // openness step 0 (just-cracked)
@@ -58,75 +93,112 @@ export const NOTE = {
   hiHatOpen3: 15,
   hiHatOpen4: 16,
   hiHatOpen5: 17,          // fully open
-  hiHatEdgeTrigger: 18,    // edge-only articulation trigger
-  hiHatTipTrigger: 19,
-  hiHatTipTriggerAlt: 20,
-  closedHat: 42,           // GM "Closed Hi-Hat" — main closed hit
+  hiHatEdgeTriggerAlt: 18,
+  hiHatTipTriggerAlt2: 19,
+  hiHatTipTriggerAlt3: 20,
+  // Duplicates of Closed/Open across 21-26
+  hiHatClosedPedalAlt: 21,
+  hiHatClosedEdgeAlt: 22,
+  hiHatOpenPedal: 23,      // pedal-open splash
+  hiHatOpen1Alt: 24,
+  hiHatOpen2Alt: 25,
+  hiHatOpen3Alt: 26,
+  // GM-standard hi-hat notes
+  closedHat: 42,           // GM "Closed Hi-Hat" — main closed (Closed Tip)
   pedalHat: 44,            // GM "Pedal Hi-Hat" — chick
-  openHat: 46,             // GM "Open Hi-Hat" — main open hit
+  openHat: 46,             // GM "Open Hi-Hat" — main open (Open 2)
+  // Mid-zone Tight + Seq articulations
+  hiHatOpen4Alt: 60,
+  hiHatClosedTipAlt: 61,
+  hiHatTightEdge: 62,
+  hiHatTightTip: 63,
+  hiHatOpen0Alt: 64,
+  hiHatSeqHits: 65,
+  // Top-octave duplicates
+  hiHatClosedTipHigh: 119,
+  hiHatOpen1High: 120,
+  hiHatOpen3High: 121,
+  hiHatClosedEdgeHigh: 122,
+  hiHatOpen0High: 123,
+  hiHatOpen5High: 124,
 
-  // Toms (low → high; SD3 Core ships ≥ 6 tom slots) ----------
-  floorTomLow: 41,         // GM "Low Floor Tom"
-  floorTom: 43,            // GM "High Floor Tom"
-  tomLow: 45,              // GM "Low Tom"
-  tomMid: 47,              // GM "Low-Mid Tom"
-  tomHigh: 48,             // GM "Hi-Mid Tom"
-  // Note 50 — GM calls this "High Tom" but SD3 Core's default
-  // map uses it for an extra crash on this kit (verified by
-  // ear). Kit-dependent; check Settings → MIDI In/E-Drums →
-  // Mapping if a different kit gives a different sound.
-  crashExtra: 50,
+  // Toms (v2: Racktom 1-3 Center on 48/47/45, Floortom 1-2
+  // Center on 43/41, with rimshot pairs on 73-82) ---------
+  floorTomLow: 41,         // Floortom 2 Center (low floor)
+  floorTom: 43,            // Floortom 1 Center (high floor)
+  tomLow: 45,              // Racktom 3 Center (14")
+  tomMid: 47,              // Racktom 2 Center (12")
+  tomHigh: 48,             // Racktom 1 Center (10")
+  // Duplicates for fast fills
+  floorTomLowAlt: 72,
+  floorTomAlt: 74,
+  tomLowAlt: 78,
+  tomMidAlt: 80,
+  tomHighAlt: 81,
+  // Tom rims
+  floorTomLowRim: 73,      // Floortom 2 Rimshot
+  floorTomRim: 75,         // Floortom 1 Rimshot
+  tomLowRim: 77,           // Racktom 3 Rimshot
+  tomMidRim: 79,           // Racktom 2 Rimshot
+  tomHighRim: 82,          // Racktom 1 Rimshot
 
-  // Tom rims (Core articulation extension) -------------------
-  floorTomLowRim: 65,
-  floorTomRim: 66,
-  tomLowRim: 67,
-  tomMidRim: 68,
-  tomHighRim: 69,
-  // 70 was tomXHighRim under GM — kit-dependent, verify by ear.
-  rim70: 70,
+  // Cymbal slots (the Danny kit has Cymbal 1-6 + China 1-2 +
+  // Spock + Splash, each with a Crash + Mute Hit pair) -----
+  // Semantic crash names (point to specific Cymbal N slots).
+  //
+  // IMPORTANT: SD3's "Cymbal 1" is the cymbal you added FIRST to
+  // the kit. Per kit-picks.md that's Crash 1 (18", smaller, sits
+  // on the left ergonomically). Cymbal 2 is Crash 2 (20", larger,
+  // sits on the right). So crashLeft = Cymbal 1, crashRight = Cymbal 2.
+  // Cymbal 5 (note 57) is empty in the current kit and was the
+  // OLD GM-flavored target for crashRight — that's why crashes
+  // sounded wrong/missing.
+  crashLeft: 28,           // = Cymbal 1 Crash (Crash 1, 18" smaller)
+  crashLeftChoke: 94,      // = Cymbal 1 Mute Hit
+  crashRight: 49,          // = Cymbal 2 Crash (Crash 2, 20" larger)
+  crashRightChoke: 50,     // = Cymbal 2 Mute Hit
+  // Individual cymbal slot access
+  cymbal1Crash: 28,        // = Crash 1 (18") in kit-picks
+  cymbal1Mute: 94,
+  cymbal2Crash: 49,        // = Crash 2 (20") in kit-picks
+  cymbal2Mute: 50,
+  cymbal3Crash: 30,
+  cymbal3Mute: 95,
+  cymbal4Crash: 31,
+  cymbal4Mute: 106,
+  cymbal5Crash: 57,
+  cymbal5Mute: 58,
+  cymbal6Crash: 32,
+  cymbal6Mute: 107,
+  // China (semantic = China 2 to match GM note 52; China 1 via alias)
+  china: 52,               // = China 2 Crash
+  chinaChoke: 54,          // = China 2 Mute Hit
+  china1Crash: 27,
+  china1Mute: 83,
+  china2Crash: 52,
+  china2Mute: 54,
+  // Splash
+  splash: 55,              // = Splash Crash
+  splashChoke: 56,         // = Splash Mute Hit
+  // Spock (stacked cymbal, e.g. 12"/14" Meinl X-treme Stack)
+  spockCrash: 29,
+  spockMute: 76,
 
-  // Cymbals --------------------------------------------------
-  crashLeft: 49,           // GM "Crash Cymbal 1"
-  rideTip: 51,             // GM "Ride Cymbal 1" — tip on bow
-  china: 52,               // GM "Chinese Cymbal"
-  rideBell: 53,            // GM "Ride Bell"
-  splash: 55,              // GM "Splash Cymbal"
-  crashRight: 57,          // GM "Crash Cymbal 2"
-  rideEdge: 59,            // GM "Ride Cymbal 2" — edge / crash-ride
-  crashLeftChoke: 71,      // velocity-1 also chokes; this is explicit
-  crashRightChoke: 72,
-  chinaChoke: 73,
-  splashChoke: 74,
-  rideChoke: 75,
-
-  // Auxiliary percussion (GM standard) -----------------------
-  // Notes 65-75 collide with tom rims and cymbal chokes above.
-  // SD3 routes them based on the loaded kit: drum kits play
-  // tom rims / chokes, percussion kits play these. Use a
-  // separate SD3 instance on its own channel for percussion.
-  tambourine: 54,
-  cowbell: 56,
-  vibraslap: 58,
-  highBongo: 60,
-  lowBongo: 61,
-  muteHighConga: 62,
-  openHighConga: 63,
-  lowConga: 64,
-  // 65 highTimbale / 66 lowTimbale — see note above; use
-  //   floorTomLowRim / floorTomRim from the tom-rim block.
-  highWoodBlock: 76,
-  lowWoodBlock: 77,
-  muteCuica: 78,
-  openCuica: 79,
-  muteTriangle: 80,
-  openTriangle: 81,
-
-  // FX / extras (SD3 Core extension above GM range) ----------
-  fxMetal: 82,             // metal hit / industrial fx
-  fxBoom: 83,              // sub-boom / impact
-  fxRise: 84,              // riser
-  fxReverse: 85,           // reverse hit
+  // Ride (v2: Bow Tip / Bow Shank / Bell Tip / Bell Shank /
+  // Edge / Mute Hit across 51-118, many duplicates) -------
+  //
+  // rideBell is intentionally aliased to Ride Bell TIP (note 88),
+  // not Bell Shank (note 53). The Bell Tip is the iconic sharp
+  // pingy ride bell that Danny's catalog is built on. Bell Shank
+  // is the heavier "clunk" sound — available as rideBellShank.
+  rideTip: 51,             // Ride Bow Tip (primary)
+  rideBell: 88,            // Ride Bell Tip (sharp ping)
+  rideEdge: 59,            // Ride Edge
+  rideBowShank: 84,
+  rideBellShank: 53,       // alt: Ride Bell Shank (heavier "clunk")
+  rideBellTip: 88,         // alias — same as rideBell
+  rideMuteHit: 118,        // Ride Mute Hit (choke)
+  rideChoke: 118,          // alias — same articulation
 } as const
 
 export type NoteName = keyof typeof NOTE
@@ -135,26 +207,28 @@ export type NoteName = keyof typeof NOTE
 // Notes on the table above
 // ---------------------------------------------------------------
 //
-// 1. Numbers 41–50 are the GM tom range. SD3 Core preserves it,
-//    so any GM-aware DAW + sampler combo will sound the right
-//    drums even if you're not in SD3.
+// 1. The Danny kit's SD3 mapping does NOT follow GM exactly. Notes
+//    50, 54, 56, 58, 65-70 (GM aux percussion / FX zone) are
+//    occupied by cymbal Mute Hits and snare/hat duplicates. The
+//    GM aux percussion block (tambourine, cowbell, bongos, etc.)
+//    is therefore NOT available in this kit. Pattern files that
+//    need those sounds must route to a separate SD3 instance with
+//    a percussion library loaded.
 //
-// 2. The hi-hat block (10–22, 26, 42, 44, 46) is SD3-specific.
-//    The high notes (42 / 44 / 46) are the "GM-facing" hits
-//    everyone knows. The low notes (10–22) are the per-openness
-//    articulations SD3 exposes for nuanced hat work — the kind
-//    visible in the screenshot's "etch-hihats" mapping preset.
+// 2. The high-zone duplicates (notes 119-127 for snare/hat) exist
+//    so MIDI keyboards can play the kit from the top octave
+//    without reaching down to the GM zone. Patterns that compose
+//    in the top range can use these directly.
 //
-// 3. Tom rims (65–70) overlap with GM aux percussion (timbales,
-//    agogos). SD3 Core resolves this by KIT: drum kits map those
-//    notes to tom rims, percussion kits map them to perc. If you
-//    need both in one project, use two SD3 instances on different
-//    channels.
+// 3. snareGhost is aliased to NOTE.snare (note 38). The Tama Bell
+//    Brass in this kit has no separate "Ghost" articulation —
+//    ghost-feel is achieved via low velocity (25-40) in drum.ts.
 //
-// 4. Choke notes (71–75) are an explicit alternative to the
-//    "velocity 1 = choke" trick. Use whichever the loaded kit
-//    is configured for.
+// 4. Choke notes (cymbal1Mute ... rideMuteHit) are explicit Mute
+//    Hit articulations. They work alongside the Choke/Mute
+//    Trigger panel's Note Off mode — either approach chokes.
 //
-// 5. FX (82–85) are above the GM range and are unique to SD3 +
-//    some SDXs (e.g. Death & Darkness). Will be silent on GM
-//    samplers.
+// 5. crashLeft / crashRight / china / splash semantic names map
+//    to specific Cymbal N slots based on the kit picks doc. If
+//    you reorder cymbals in SD3, update the numeric values here
+//    rather than in every pattern file.

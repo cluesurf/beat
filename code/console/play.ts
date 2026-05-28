@@ -11,7 +11,7 @@
 
 import { dirname, relative, resolve } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
-import { existsSync, readFileSync, watch } from 'node:fs'
+import { existsSync, readFileSync, readdirSync, statSync, watch } from 'node:fs'
 import easymidi from 'easymidi'
 import { debounce } from 'lodash-es'
 import type { Argv, CommandModule } from 'yargs'
@@ -145,10 +145,29 @@ export const playCommand: CommandModule<unknown, Args> = {
         default: 0,
         describe:
           'Shift drum hits earlier by N ms to compensate for IAC + sampler latency vs Logic. Dial in until drums lock with guitar audio. Used with --sync link.',
-      }) as Argv<Args>,
+      })
+      .example([
+        ['$0 play song.beat', 'Play + loop a .beat file (hot-reloads on save)'],
+        ['$0 play song.beat --once', 'Play through once, then exit'],
+        ['$0 play song.beat --loop 3', 'Loop ONLY bar 3, forever'],
+        ['$0 play song.beat --loop 3..6', 'Loop bars 3-6 (inclusive), forever'],
+        ['$0 play song.beat --from 7 --to 10', 'Play bars 7-10 once'],
+        ['$0 play song.beat --part chorus', 'Play only the "chorus" section'],
+        ['$0 play song.beat --part bridge --measure 2', 'Start at bar 2 of "bridge"'],
+        ['$0 play song.beat --sync link', "Lock tempo to Ableton (Link)"],
+      ]) as Argv<Args>,
   handler: async args => {
     await runPlay(args)
   },
+}
+
+// Same command, runnable WITHOUT the `play` word: `beat <song>`.
+// Hidden from the command list (describe: false) so it doesn't
+// duplicate `play` in --help, but it makes `beat tree.beat` work.
+export const defaultPlayCommand: CommandModule<unknown, Args> = {
+  ...playCommand,
+  command: '$0 <song>',
+  describe: false,
 }
 
 function applyLoopFlag(args: Args): void {
@@ -198,21 +217,56 @@ function applyLoopFlag(args: Args): void {
   args.to = to
 }
 
+// Resolve the `song` positional into a concrete file path. Accepts:
+//   1. a direct path to a song file, e.g. flow/tree/code/tree.beat
+//   2. a directory holding a song file (text.beat / *.beat / index.ts …)
+//   3. a bare name → the engine's own test/<name> demo folder
+// (1) and (2) resolve relative to the current working directory, so
+// `beat play make/home/flow/tree/code/tree.beat` works from any repo.
+function findSongFile(dir: string, candidates: string[]): string | undefined {
+  for (const name of candidates) {
+    const p = resolve(dir, name)
+    if (existsSync(p)) return p
+  }
+  // Fallback: any single .beat file in the folder.
+  const beats = readdirSync(dir).filter(f => f.endsWith('.beat'))
+  return beats.length > 0 ? resolve(dir, beats[0]!) : undefined
+}
+
+function resolveSongPath(songArg: string, format: string): string {
+  const candidates = FORMAT_FILES[format] ?? FORMAT_FILES.auto!
+  const fromCwd = resolve(process.cwd(), songArg)
+
+  if (existsSync(fromCwd)) {
+    const stat = statSync(fromCwd)
+    if (stat.isFile()) return fromCwd
+    if (stat.isDirectory()) {
+      const found = findSongFile(fromCwd, candidates)
+      if (found) return found
+    }
+  }
+
+  // Bare name → the engine's bundled demo songs under test/.
+  const testDir = resolve(__dirname, `../../test/${songArg}`)
+  if (existsSync(testDir) && statSync(testDir).isDirectory()) {
+    const found = findSongFile(testDir, candidates)
+    if (found) return found
+  }
+
+  throw new Error(
+    `No song found for "${songArg}". Pass a path to a .beat file ` +
+      `(e.g. make/home/flow/tree/code/tree.beat), a song folder, or a ` +
+      `demo name under deck/beat/test/.`,
+  )
+}
+
 async function runPlay(args: Args): Promise<void> {
   applyLoopFlag(args)
   const watchMode = !args.once
-  const songDir = resolve(__dirname, `../../test/${args.song}`)
-  const candidates = FORMAT_FILES[args.format] ?? FORMAT_FILES.auto!
-  const found = candidates
-    .map(f => resolve(songDir, f))
-    .find(p => existsSync(p))
-  if (!found) {
-    throw new Error(
-      `No song file found in ${songDir} ` +
-        `(looked for: ${candidates.join(', ')})`,
-    )
-  }
-  const songPath: string = found
+  const songPath = resolveSongPath(args.song, args.format)
+  // Watch the song's folder so edits to it (or files it imports)
+  // trigger a hot reload.
+  const songDir = dirname(songPath)
 
   async function loadSong(): Promise<Song> {
     let song: Song

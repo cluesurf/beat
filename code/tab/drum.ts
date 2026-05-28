@@ -14,9 +14,17 @@
 //     instrument: tom-1     # alias an existing instrument
 //     x: { note: 50 }       # override the note for `x` on this line
 
-import { NOTE } from '../note'
-import { KIT_CHANNEL } from '../route'
+import { DRUM_CHANNEL, NOTE } from '../note'
 import type { InstrumentDef, LineDef, NoteSpec } from './types'
+
+// All drumkit instruments route to DRUM_CHANNEL (Ableton Ch. 10),
+// the GM drum standard. SD3 in the lean setup receives everything
+// on that single channel and routes by note number.
+//
+// For a multi-track setup where each piece has its own Ableton
+// track + SD3 instance, swap CHANNEL back to KIT_CHANNEL.<PIECE>
+// (from ../route) per instrument.
+const CHANNEL = DRUM_CHANNEL
 
 // ---------------------------------------------------------------
 // Articulation maps per instrument
@@ -25,7 +33,7 @@ import type { InstrumentDef, LineDef, NoteSpec } from './types'
 export const DRUMKIT_INSTRUMENTS: Record<string, InstrumentDef> = {
   hihat: {
     name: 'hihat',
-    channel: KIT_CHANNEL.HI_HAT,
+    channel: CHANNEL,
     articulations: {
       closed: NOTE.closedHat,
       open: NOTE.openHat,
@@ -47,7 +55,7 @@ export const DRUMKIT_INSTRUMENTS: Record<string, InstrumentDef> = {
 
   'hihat-pedal': {
     name: 'hihat-pedal',
-    channel: KIT_CHANNEL.HI_HAT,
+    channel: CHANNEL,
     articulations: { pedal: NOTE.pedalHat },
     defaultArticulation: 'pedal',
     defaultVelocity: 90,
@@ -56,7 +64,7 @@ export const DRUMKIT_INSTRUMENTS: Record<string, InstrumentDef> = {
 
   snare: {
     name: 'snare',
-    channel: KIT_CHANNEL.SNARE,
+    channel: CHANNEL,
     articulations: {
       wired: NOTE.snare,
       ghost: NOTE.snareGhost,
@@ -84,7 +92,7 @@ export const DRUMKIT_INSTRUMENTS: Record<string, InstrumentDef> = {
 
   kick: {
     name: 'kick',
-    channel: KIT_CHANNEL.KICK,
+    channel: CHANNEL,
     articulations: { main: NOTE.kick, alt: NOTE.kickAlt },
     defaultArticulation: 'main',
     defaultVelocity: 100,
@@ -98,20 +106,20 @@ export const DRUMKIT_INSTRUMENTS: Record<string, InstrumentDef> = {
     },
   },
 
-  'tom-1': singleArticulationTom('tom-1', NOTE.tomHigh, KIT_CHANNEL.TOM_1),
-  'tom-2': singleArticulationTom('tom-2', NOTE.tomMid, KIT_CHANNEL.TOM_2),
-  'tom-3': singleArticulationTom('tom-3', NOTE.tomLow, KIT_CHANNEL.TOM_3),
-  'tom-4': singleArticulationTom('tom-4', NOTE.floorTom, KIT_CHANNEL.TOM_4),
-  'tom-5': singleArticulationTom('tom-5', NOTE.floorTomLow, KIT_CHANNEL.TOM_5),
+  'tom-1': singleArticulationTom('tom-1', NOTE.tomHigh, CHANNEL),
+  'tom-2': singleArticulationTom('tom-2', NOTE.tomMid, CHANNEL),
+  'tom-3': singleArticulationTom('tom-3', NOTE.tomLow, CHANNEL),
+  'tom-4': singleArticulationTom('tom-4', NOTE.floorTom, CHANNEL),
+  'tom-5': singleArticulationTom('tom-5', NOTE.floorTomLow, CHANNEL),
 
-  'crash-1': cymbal('crash-1', NOTE.crashLeft, NOTE.crashLeftChoke, KIT_CHANNEL.CRASH_1),
-  'crash-2': cymbal('crash-2', NOTE.crashRight, NOTE.crashRightChoke, KIT_CHANNEL.CRASH_2),
-  china: cymbal('china', NOTE.china, NOTE.chinaChoke, KIT_CHANNEL.CHINA),
-  splash: cymbal('splash', NOTE.splash, NOTE.splashChoke, KIT_CHANNEL.SPLASH),
+  'crash-1': cymbal('crash-1', NOTE.crashLeft, NOTE.crashLeftChoke, CHANNEL),
+  'crash-2': cymbal('crash-2', NOTE.crashRight, NOTE.crashRightChoke, CHANNEL),
+  china: cymbal('china', NOTE.china, NOTE.chinaChoke, CHANNEL),
+  splash: cymbal('splash', NOTE.splash, NOTE.splashChoke, CHANNEL),
 
   ride: {
     name: 'ride',
-    channel: KIT_CHANNEL.RIDE,
+    channel: CHANNEL,
     articulations: {
       tip: NOTE.rideTip,
       bell: NOTE.rideBell,

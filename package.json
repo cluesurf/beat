@@ -10,7 +10,7 @@
     ".": "./host/code/index.js"
   },
   "bin": {
-    "beat": "host/code/console/beat.js"
+    "beat": "host/code/console/index.js"
   },
   "files": [
     "host",
@@ -18,6 +18,7 @@
     "license.md"
   ],
   "scripts": {
+    "cli": "tsx code/console/index.ts",
     "try": "tsx code/console/index.ts try",
     "check": "tsx code/console/index.ts list-ports",
     "stop": "tsx code/console/index.ts stop",
@@ -29,7 +30,8 @@
     "text:host": "cd text && pnpm exec vsce publish",
     "text:login": "cd text && pnpm exec vsce login cluesurf",
     "text:view": "cd text && pnpm view",
-    "make": "rm -rf host && pnpm exec tsc --project tsconfig.json --pretty && rm -f tsconfig.tsbuildinfo && pnpm exec tsc-alias --project tsconfig.json --resolve-full-paths && chmod +x host/code/console/beat.js",
+    "make": "rm -rf host && pnpm exec tsc --project tsconfig.json --pretty && rm -f tsconfig.tsbuildinfo && pnpm exec tsc-alias --project tsconfig.json --resolve-full-paths && chmod +x host/code/console/index.js host/code/console/beat.js",
+    "make:watch": "pnpm exec concurrently -n tsc,alias -c blue,magenta \"tsc -w --preserveWatchOutput -p tsconfig.json\" \"tsc-alias -w -p tsconfig.json --resolve-full-paths\"",
     "host": "pnpm make && pnpm publish --access=public --no-git-checks"
   },
   "prettier": "@cluesurf/wash/flow.json",
